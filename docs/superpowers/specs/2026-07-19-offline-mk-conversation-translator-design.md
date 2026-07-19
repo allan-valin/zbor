@@ -219,11 +219,31 @@ This work decomposes into two independently plannable pieces:
 - **SP2 — The Macedonian Voice.** Train a Piper/VITS mk voice and drop it in
   behind the existing `TTSEngine`. This is the project's true payoff. Runs
   after/parallel to SP1 because the interface is already stubbed by the espeak
-  backend. Notes: Piper phonemizes via espeak-ng (mk phonemes exist); Bulgarian
-  MMS-TTS is a viable finetune seed (mk↔bg are phonetically close); needs a
-  single-speaker mk dataset (candidate sources: Macedonian-ASR community data,
-  Common Voice mk). **Native-speaker evaluation is the bottleneck** given rare
-  access — batch a fixed eval sentence set, collect judgments in one pass.
+  backend. Piper phonemizes via espeak-ng (mk phonemes exist), so SP1's espeak
+  work feeds SP2.
+
+  **Data availability (spiked 2026-07-19):** There is **no single-speaker mk TTS
+  corpus** off the shelf (no LJSpeech-equivalent; OpenSLR has no Macedonian). The
+  only meaningful free mk speech data is **FLEURS mk (~3725 clips, ~10h, clean,
+  transcribed, but multi-speaker)** — the `shunyalabs/macedonian-speech-dataset`
+  repo is a byte-identical repackage of it. Common Voice mk exists but is now
+  behind Mozilla Data Collective (extra access hoop) and is small/multi-speaker.
+  `Speech-data/Macedonian-Speech-Dataset` is a single 41-second promo clip
+  (useless). Ranked training paths:
+  - **A (best quality) — record your own single speaker.** The app exists to talk
+    to a specific person from N. Macedonia; that person or a contact records
+    ~2-5h of scripted sentences → one clean, consistent, natural voice. Fits the
+    app's personal purpose (the voice can literally be someone relevant). Cost:
+    labor + a willing native + a decent phone mic.
+  - **B — finetune single-speaker Bulgarian MMS-TTS on FLEURS mk.** bg VITS is
+    single-voice; adapt phonetics to mk with the ~10h. One identity, no recording.
+  - **C — multi-speaker VITS on FLEURS mk (~10h).** Works but "averaged" voice,
+    quality capped by multi-speaker 10h. Lowest effort, muddiest result.
+  - **D — espeak-ng** remains the guaranteed floor shipped by SP1.
+
+  Training data (~2.6GB FLEURS) lives on the dev machine; only the ~60MB trained
+  voice ships to the phone. **Native-speaker evaluation is the bottleneck** given
+  rare access — batch a fixed eval sentence set, collect judgments in one pass.
 
 Brainstorm/plan SP1 first; SP2 gets its own spec → plan cycle.
 
@@ -245,8 +265,12 @@ gears on demand, so alternatives are pre-decided.
 
 - **espeak-ng mk intelligibility** — validate the robotic voice is at least
   understandable to a Macedonian; it is the day-1 voice until SP2 lands.
-- **SP2 data availability** — is there enough clean single-speaker mk audio to
-  train a natural Piper voice? Biggest unknown for the real payoff.
+- **SP2 data availability** — RESOLVED (2026-07-19): no off-shelf single-speaker
+  mk corpus; only ~10h multi-speaker FLEURS. Best path is recording your own
+  single speaker. Open follow-up: secure a willing native + recording setup.
+- **Model hosting** — the ~0.9GB pack is mirrored to our own Hugging Face model
+  repo (free CDN, versioned, checksummed); app downloads once over home wifi;
+  manual sideload is the fallback. Not GitHub Releases / R2 unless HF fails.
 - **Native eval logistics** — design the batched eval set early so rare mk
   access is used efficiently (covers both espeak sanity and trained-voice
   quality).
