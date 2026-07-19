@@ -230,16 +230,18 @@ This work decomposes into two independently plannable pieces:
   behind Mozilla Data Collective (extra access hoop) and is small/multi-speaker.
   `Speech-data/Macedonian-Speech-Dataset` is a single 41-second promo clip
   (useless). Ranked training paths:
-  - **A (best quality) — record your own single speaker.** The app exists to talk
-    to a specific person from N. Macedonia; that person or a contact records
-    ~2-5h of scripted sentences → one clean, consistent, natural voice. Fits the
-    app's personal purpose (the voice can literally be someone relevant). Cost:
-    labor + a willing native + a decent phone mic.
-  - **B — finetune single-speaker Bulgarian MMS-TTS on FLEURS mk.** bg VITS is
-    single-voice; adapt phonetics to mk with the ~10h. One identity, no recording.
-  - **C — multi-speaker VITS on FLEURS mk (~10h).** Works but "averaged" voice,
-    quality capped by multi-speaker 10h. Lowest effort, muddiest result.
-  - **D — espeak-ng** remains the guaranteed floor shipped by SP1.
+  - **A — finetune single-speaker Bulgarian MMS-TTS on FLEURS mk (+ Common Voice
+    mk).** bg VITS is single-voice; adapt phonetics to mk. One consistent
+    identity, no recording. Preferred: closest existing single voice, and Allan's
+    "quality > size" thesis suggests a curated subset may beat all ~10h. Chosen
+    primary.
+  - **B — multi-speaker VITS on FLEURS mk + Common Voice mk.** More data, but
+    "averaged"/muddy voice, quality capped by multi-speaker material. Fallback.
+  - **C — espeak-ng** remains the guaranteed floor shipped by SP1.
+  - **REJECTED — record your own single speaker.** Would give the cleanest voice,
+    but ruled out by Allan: 2-5h scripted reading is too big an ask, a willing
+    native is low-probability and would drag on months/years, and without pro
+    mics the realistic quality ≈ FLEURS/CV anyway. Not worth the dependency.
 
   Training data (~2.6GB FLEURS) lives on the dev machine; only the ~60MB trained
   voice ships to the phone. **Native-speaker evaluation is the bottleneck** given
@@ -266,11 +268,12 @@ gears on demand, so alternatives are pre-decided.
 - **espeak-ng mk intelligibility** — validate the robotic voice is at least
   understandable to a Macedonian; it is the day-1 voice until SP2 lands.
 - **SP2 data availability** — RESOLVED (2026-07-19): no off-shelf single-speaker
-  mk corpus; only ~10h multi-speaker FLEURS. Best path is recording your own
-  single speaker. Open follow-up: secure a willing native + recording setup.
-- **Model hosting** — the ~0.9GB pack is mirrored to our own Hugging Face model
-  repo (free CDN, versioned, checksummed); app downloads once over home wifi;
-  manual sideload is the fallback. Not GitHub Releases / R2 unless HF fails.
+  mk corpus; only ~10h multi-speaker FLEURS + small Common Voice mk. Recording
+  your own speaker was rejected. Primary path = finetune Bulgarian MMS-TTS on
+  FLEURS/CV mk; multi-speaker VITS is the fallback.
+- **Model hosting** — the ~0.9GB pack ships via **GitHub Releases** (Allan's
+  portfolio, user `allan-valin`; assets ≤2GB each, free CDN, checksummed). App
+  downloads once over home wifi; manual sideload is the fallback.
 - **Native eval logistics** — design the batched eval set early so rare mk
   access is used efficiently (covers both espeak sanity and trained-voice
   quality).
