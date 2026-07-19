@@ -1,0 +1,54 @@
+NLLB-200 distilled 600M round-trip spike
+Judge the 'back' line: did the idiom meaning survive, or go literal?
+
+=== IDIOMS ===
+
+[en] It's raining cats and dogs.
+  mk:   Дождува мачки и кучиња.
+  back: She's waiting for cats and dogs.
+
+[en] Break a leg!
+  mk:   Скрши си нога!
+  back: - You broke your leg!
+
+[en] That costs an arm and a leg.
+  mk:   Тоа чини рака и нога.
+  back: It's costing my arm and leg.
+
+[en] It's a piece of cake.
+  mk:   Тоа е парче торта.
+  back: It's a piece of cake.
+
+[pt] Custa os olhos da cara.
+  mk:   Тоа е многу скапо.
+  back: - Isso é muito caro.
+
+[pt] Vou chutar o balde.
+  mk:   Ќе го фрлам букетот.
+  back: Vou jogar o bocado.
+
+[pt] Ele pagou o pato.
+  mk:   Тој ја платил патиката.
+  back: Ele pagou os sapatos.
+
+[de] Ich verstehe nur Bahnhof.
+  mk:   Само ја разбирам станицата.
+  back: Ich verstehe nur die Station.
+
+=== PLAIN ===
+
+[en] Where is the bus station?
+  mk:   Каде е автобуската станица?
+  back: Where's the bus stop?
+
+[pt] Quanto custa isto?
+  mk:   Колку чини ова?
+  back: Quanto custa isto?
+
+[en] I am allergic to nuts.
+  mk:   Јас сум алергичен на јадлици.
+  back: I'm allergic to food.
+
+[pt] Preciso de um medico.
+  mk:   Јас треба да имам лекар.
+  back: - Preciso de um médico.

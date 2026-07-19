@@ -38,9 +38,13 @@ Two secondary complaints with existing tools, to be improved here:
 - **Tap-a-word-to-re-record.** v1 edit is a full editable text field. Word-level
   re-record is v2. (This deferral was the author-of-the-spec's call during
   brainstorming, accepted by the user.)
-- **Better-than-NLLB idiom handling.** Using an LLM translator for idioms is a
-  possible v2 upgrade; MVP uses NLLB, which already beats Google statistical MT
-  on idioms.
+- **Better-than-NLLB idiom handling.** MVP uses NLLB. The 2026-07-19 spike showed
+  NLLB handles plain sentences well but renders most idioms literally (same
+  complaint as Google) — see Spike Findings. An LLM translator is the v2 upgrade
+  for idioms; on-device it is large/heavy, hence deferred.
+- **Text-only output (no TTS).** Explicitly rejected: TTS *is* the point of the
+  app. Showing Macedonian text only is what Google Translate already does, so a
+  text-only build would have no reason to exist.
 - **Non-Android platforms.** Android/Kotlin only, targeting the user's Redmi.
 
 ## Target Device
@@ -53,17 +57,28 @@ MT+TTS via NNAPI/NPU. Per-turn latency target ~3-5s.
 
 - **Platform:** Native Android, Kotlin.
 - **STT:** whisper.cpp (native, JNI), `small` model, GGUF q5, ~190MB. Single
-  multilingual model covers mk/pt/en/de.
+  multilingual model covers mk/pt/en/de. Model file is path-swappable behind
+  `STTEngine` — a Macedonian-tuned whisper (e.g. `Macedonian-ASR/buki-whisper`,
+  `whisper-large-v3-macedonian-asr`) can be dropped in for the mk direction
+  later with no interface change.
 - **Translation (MT):** NLLB-200 distilled 600M, ONNX Runtime Android, ONNX int8,
-  ~650MB. Single multilingual model covers all pairs and directions.
-- **TTS:** Meta MMS-TTS (VITS), ONNX Runtime Android, one ~120MB model per
-  language → mk/pt/en/de ≈ ~480MB.
-- **Total model pack:** ~1.3GB.
+  ~650MB. Single multilingual model covers all pairs and directions. Good on
+  plain sentences; weak on idioms (see Spike Findings).
+- **TTS (the crux):** No free offline Macedonian neural voice exists (see Spike
+  Findings). Two-backend `TTSEngine`:
+  - **Backend A — `espeak-ng` (mk):** formant synthesis, offline, free, tiny,
+    robotic. Ships day 1 so the app is functional immediately. For pt/en/de
+    output either espeak-ng or MMS-TTS (those languages DO exist in MMS).
+  - **Backend B — custom-trained Macedonian neural voice (the real deliverable):**
+    Piper/VITS finetuned on Macedonian audio. Replaces backend A for mk once
+    trained. Same `TTSEngine` interface — swap is invisible to the pipeline.
+- **Total model pack:** ~0.9GB at launch (whisper + NLLB + espeak data), +~60MB
+  when the trained Piper mk voice lands.
 
 Rationale: whisper.cpp is the best on-device STT native lib. ONNX Runtime is one
-mature Android runtime shared by MT and TTS, with int8 quantization and NNAPI.
-whisper + NLLB being single multilingual models makes 4 languages cost almost
-the same as 1 (only per-language MMS TTS voices add size).
+mature Android runtime shared by MT and TTS. whisper + NLLB being single
+multilingual models makes 4 languages cost almost the same as 1. TTS is the
+hard gear — see the dedicated sub-project below.
 
 ## Architecture
 
@@ -73,9 +88,9 @@ Five isolated, independently testable units plus the UI.
 ConversationUI  (split-screen, icon-driven, per-side language)
       │  audio in / text edit / play
 PipelineOrchestrator  (per-turn state machine; owns the edit pause)
-      ├── STTEngine   (whisper.cpp)      depends on ModelMgr
-      ├── MTEngine    (NLLB / ONNX)      depends on ModelMgr
-      ├── TTSEngine   (MMS / ONNX)       depends on ModelMgr
+      ├── STTEngine   (whisper.cpp)               depends on ModelMgr
+      ├── MTEngine    (NLLB / ONNX)               depends on ModelMgr
+      ├── TTSEngine   (backend: espeak-ng | Piper) depends on ModelMgr
       └── ModelMgr    (load / evict / RAM policy)
 ```
 
@@ -166,12 +181,78 @@ already reading the translated text.
 - Manual: the emulator can't run whisper/NNAPI well, so a **real Redmi pass is
   required each batch** (consistent with the author's existing app discipline).
 
+## Spike Findings (2026-07-19)
+
+Ran two desktop spikes before building. Two earlier assumptions in this spec
+were wrong and are corrected here.
+
+1. **No free offline Macedonian neural TTS exists.** Confirmed three ways:
+   `facebook/mms-tts-mkd` absent on Hugging Face (org returns 401 for missing
+   repos; `eng`/`por` return 200); no Piper/VITS/Coqui Macedonian voice in HF
+   search; Meta's own CDN returns 403 for `mms/tts/mkd.tar.gz` while `eng.tar.gz`
+   returns 200. **Correction:** an earlier version of this spec assumed MMS-TTS
+   covered Macedonian. It does not. Consequence: the two-backend TTS strategy
+   (espeak-ng now, trained Piper voice later) in the Stack section.
+
+2. **NLLB: strong on plain sentences, weak on idioms.** Round-trip test
+   (`src → mk → src`): plain sentences ("Where is the bus station?",
+   "Quanto custa isto?", "Preciso de um médico") came back correct; most idioms
+   went literal ("raining cats and dogs" → "Дождува мачки и кучиња";
+   "break a leg" → "Скрши си нога"; "piece of cake" → "парче торта"). One pt
+   idiom survived ("custa os olhos da cara" → "многу скапо"). One safety-ish
+   miss: "allergic to nuts" fuzzed to "food". **Correction:** an earlier version
+   claimed NLLB beats Google on idioms — it does not, reliably. It is fine for
+   the plain speech that dominates travel/survival conversation; idiom fidelity
+   waits for the v2 LLM translator.
+
+3. **Bonus — Macedonian STT is well served.** Dedicated mk-tuned models exist
+   (`Macedonian-ASR/buki-whisper`, `whisper-large-v3-macedonian-asr`, mk
+   wav2vec2). STT is the strongest gear, upgradable behind `STTEngine`.
+
+## Sub-Project Split
+
+This work decomposes into two independently plannable pieces:
+
+- **SP1 — The App.** Android/Kotlin: UI, orchestrator + edit seam, STT (whisper),
+  MT (NLLB), `TTSEngine` with the **espeak-ng backend**, ModelMgr, delivery.
+  Fully shippable and useful on its own (robotic mk voice). This is the MVP.
+- **SP2 — The Macedonian Voice.** Train a Piper/VITS mk voice and drop it in
+  behind the existing `TTSEngine`. This is the project's true payoff. Runs
+  after/parallel to SP1 because the interface is already stubbed by the espeak
+  backend. Notes: Piper phonemizes via espeak-ng (mk phonemes exist); Bulgarian
+  MMS-TTS is a viable finetune seed (mk↔bg are phonetically close); needs a
+  single-speaker mk dataset (candidate sources: Macedonian-ASR community data,
+  Common Voice mk). **Native-speaker evaluation is the bottleneck** given rare
+  access — batch a fixed eval sentence set, collect judgments in one pass.
+
+Brainstorm/plan SP1 first; SP2 gets its own spec → plan cycle.
+
+## Fallback Matrix (Plan B/C/D per gear)
+
+Locked now because Macedonian native-speaker access is rare — we cannot re-test
+gears on demand, so alternatives are pre-decided.
+
+| Gear | Plan A (chosen) | Plan B | Plan C | Plan D |
+|---|---|---|---|---|
+| **mk TTS** | espeak-ng (ship) → trained Piper mk (goal) | Finetune Bulgarian MMS-TTS on mk data | Azure mk-MK (online only, home/practice) | ElevenLabs multilingual (online, paid) |
+| **mk STT** | whisper.cpp `small` | mk-tuned whisper (buki / large-v3-mk) | whisper `medium` (accents) | wav2vec2 mk |
+| **Translate** | NLLB-600M int8 | NLLB-1.3B (better, heavier) | On-device small LLM (idioms, heavy) | Cloud LLM (online, best idioms) |
+| **MT runtime** | ONNX Runtime + NNAPI | ONNX Runtime CPU only | ctranslate2 | TF Lite |
+| **RAM policy** | HOT (Redmi 8GB+) | WARM | COLD | reduce model tiers |
+| **Model delivery** | first-run wifi download | manual sideload import | split asset packs | bundle-in-APK (if small enough) |
+
 ## Open Questions / Risks
 
-- MMS-TTS Macedonian voice quality — validate it is intelligible early; it is the
-  whole reason for the project.
-- NLLB idiom quality on mk↔pt/de specifically — spot-check; LLM translator is the
-  v2 escape hatch if inadequate.
-- whisper `small` accuracy on strong Macedonian accents — `medium` is a fallback
-  at a latency/RAM cost.
+- **espeak-ng mk intelligibility** — validate the robotic voice is at least
+  understandable to a Macedonian; it is the day-1 voice until SP2 lands.
+- **SP2 data availability** — is there enough clean single-speaker mk audio to
+  train a natural Piper voice? Biggest unknown for the real payoff.
+- **Native eval logistics** — design the batched eval set early so rare mk
+  access is used efficiently (covers both espeak sanity and trained-voice
+  quality).
+- **NLLB idiom coping** — UX should nudge plain phrasing; consider a phrasebook
+  of pre-verified common sentences to sidestep MT entirely for critical needs
+  (e.g. "I'm allergic to X").
+- whisper `small` accuracy on strong Macedonian accents — mk-tuned whisper is
+  the Plan B.
 - ONNX int8 NLLB accuracy vs fp16 — verify quantization does not degrade badly.
