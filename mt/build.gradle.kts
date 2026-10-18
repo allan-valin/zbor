@@ -14,7 +14,7 @@ dependencies {
 }
 tasks.test {
     useJUnitPlatform()
-    maxHeapSize = "3g"
+    maxHeapSize = "1g"
     // Real-model tests read from here and skip when it is absent.
     environment("ZBOR_MODELS", System.getenv("ZBOR_MODELS") ?: "${System.getProperty("user.home")}/zbor-build/models")
 }
