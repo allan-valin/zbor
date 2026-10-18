@@ -76,8 +76,13 @@ class PackInstaller(val dir: File, val manifest: PackManifest) {
 
     private fun check(f: PackFile, deep: Boolean): State {
         val marker = File(markers, f.name)
-        if (f.unzip) return if (marker.isFile && marker.readText().startsWith(f.sha256)) State.OK else State.MISSING
         val file = File(dir, f.name)
+        if (f.unzip) {
+            if (marker.isFile && marker.readText().startsWith(f.sha256)) return State.OK
+            // Sideloaded as-is (USB copy of the release): install it from where it lies.
+            if (file.isFile) return if (install(f, file)) State.OK else State.BAD
+            return State.MISSING
+        }
         if (!file.isFile) return State.MISSING
         if (file.length() != f.size) return State.BAD
         if (!deep && marker.isFile && marker.readText() == stamp(f, file)) return State.OK

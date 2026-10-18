@@ -31,5 +31,5 @@ tasks.register<JavaExec>("packTool") {
     classpath = sourceSets["main"].runtimeClasspath + packTool
     mainClass.set("mk.zbor.mt.PackToolKt")
     maxHeapSize = "2g"
-    args(providers.gradleProperty("packArgs").get().split(" "))
+    args(providers.gradleProperty("packArgs").get().split("|"))
 }

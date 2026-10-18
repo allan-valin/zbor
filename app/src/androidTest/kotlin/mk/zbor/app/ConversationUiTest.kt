@@ -25,7 +25,7 @@ class ConversationUiTest {
 
     @Before fun needsPack() {
         val ctx = InstrumentationRegistry.getInstrumentation().targetContext
-        assumeTrue(ModelPack.location(ctx).missing().isEmpty())
+        assumeTrue(ModelPack.installer(ctx).status().ready)
     }
 
     private fun text(tag: String) = rule.onNodeWithTag(tag).fetchSemanticsNode()

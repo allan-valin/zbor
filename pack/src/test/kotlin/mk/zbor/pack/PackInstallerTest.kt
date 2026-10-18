@@ -124,4 +124,14 @@ class PackInstallerTest {
         }
         assertTrue(!File(tmp, "outside").exists())
     }
+
+    @Test fun `release files copied straight into the pack dir are detected, zip extracted`() {
+        val m = makeRelease()
+        device.mkdirs()
+        release.listFiles()!!.forEach { it.copyTo(File(device, it.name)) }
+        val p = PackInstaller(device, m)
+        assertTrue(p.status().ready, p.status().toString())
+        assertEquals("здраво", File(device, "voice-data/mk_dict").readText())
+        assertTrue(!File(device, "voice-data.zip").exists())
+    }
 }

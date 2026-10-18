@@ -15,6 +15,6 @@ kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarg
 tasks.register<JavaExec>("manifest") {
     description = "Writes pack.json for a built pack; see tools/build_pack.sh"
     classpath = sourceSets["main"].runtimeClasspath
-    mainClass.set("mk.zbor.pack.ManifestToolKt")
-    args(providers.gradleProperty("manifestArgs").get().split(" "))
+    mainClass.set("mk.zbor.pack.PackManifestKt")
+    args(providers.gradleProperty("manifestArgs").get().split("|"))
 }

@@ -17,14 +17,14 @@ import mk.zbor.core.Lang
 import mk.zbor.engines.ModelPack
 import mk.zbor.ui.ConversationActions
 import mk.zbor.ui.ConversationScreen
-import mk.zbor.ui.MissingPackScreen
+import mk.zbor.ui.SetupActions
+import mk.zbor.ui.SetupScreen
 import mk.zbor.ui.SettingsDialog
 import mk.zbor.ui.ZborTheme
 
 class MainActivity : ComponentActivity() {
     private var micAllowed by mutableStateOf(false)
     private var pendingMic: Side? = null
-    private var packMissing by mutableStateOf(emptyList<java.io.File>())
     private var settingsOpen by mutableStateOf(false)
 
     private val askMic = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
@@ -35,11 +35,15 @@ class MainActivity : ComponentActivity() {
     }
 
     private val vm: ConversationViewModel by viewModels()
+    private val setup: SetupViewModel by viewModels()
+
+    private val pickFolder = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) setup.importFrom(uri)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val pack = ModelPack.location(this)
-        packMissing = pack.missing()
         micAllowed = hasMic()
 
         val actions = object : ConversationActions {
@@ -54,11 +58,18 @@ class MainActivity : ComponentActivity() {
             override fun setLang(side: Side, lang: Lang) = vm.controller.setLang(side, lang)
             override fun openSettings() { settingsOpen = true }
         }
+        val setupActions = object : SetupActions {
+            override fun download(confirmedMetered: Boolean) = setup.download(confirmedMetered)
+            override fun pause() = setup.pause()
+            override fun importFolder() = pickFolder.launch(null)
+            override fun verify() = setup.check(deep = true)
+        }
 
         setContent {
             ZborTheme {
-                if (packMissing.isNotEmpty()) {
-                    MissingPackScreen(pack.dir, packMissing) { packMissing = pack.missing() }
+                val setupState by setup.state.collectAsState()
+                if (setupState != SetupState.Ready) {
+                    SetupScreen(setupState, setup.totalBytes, pack.dir, setupActions)
                 } else {
                     val ui by vm.controller.state.collectAsState()
                     val slow by vm.slowMode.collectAsState()

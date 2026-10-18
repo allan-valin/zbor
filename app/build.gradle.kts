@@ -6,6 +6,9 @@ plugins {
 
 // Native sources live outside the repo (see tools/build_espeak.sh and docs/BUILD.md).
 val zborBuild = providers.gradleProperty("zbor.build").orNull ?: "${System.getProperty("user.home")}/zbor-build"
+// Where the model pack is downloaded from: GitHub Release assets (repo name still to be confirmed).
+val packUrl = providers.gradleProperty("zbor.packUrl").orNull
+    ?: "https://github.com/allan-valin/zbor/releases/download/pack-v1/"
 
 android {
     namespace = "mk.zbor"
@@ -19,6 +22,7 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "PACK_URL", "\"$packUrl\"")
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
         externalNativeBuild {
             cmake {
@@ -49,13 +53,14 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
-    buildFeatures { compose = true }
+    buildFeatures { compose = true; buildConfig = true }
     packaging { jniLibs { useLegacyPackaging = false } }
 }
 
 dependencies {
     implementation(project(":core"))
     implementation(project(":mt"))
+    implementation(project(":pack"))
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.22.0")
 
     implementation("androidx.core:core-ktx:1.16.0")
@@ -76,6 +81,7 @@ dependencies {
     androidTestImplementation(kotlin("test"))
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test:core-ktx:1.6.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2025.06.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

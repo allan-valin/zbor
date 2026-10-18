@@ -1,0 +1,31 @@
+{
+    "version": "pack-v1",
+    "files": [
+        {
+            "name": "espeak-ng-data.zip",
+            "size": 9210017,
+            "sha256": "81e770a211083f9b1d3a1207e6e184bfa510a94df6fce07b9728361116616a3e",
+            "unzip": true
+        },
+        {
+            "name": "ggml-small-q5_1.bin",
+            "size": 190085487,
+            "sha256": "ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb"
+        },
+        {
+            "name": "nllb-decoder.ort",
+            "size": 475726352,
+            "sha256": "b7ced77a6bcbfda6c5676f84f017a69e51ccaee0fd8ddc3c61b30ca7a884f0e8"
+        },
+        {
+            "name": "nllb-encoder.ort",
+            "size": 419270176,
+            "sha256": "1620516265e6a09f5b84ca7a65e0ff833c376598503a3d0600685f0ebb921b7f"
+        },
+        {
+            "name": "nllb-tokenizer.bin",
+            "size": 6938060,
+            "sha256": "330d80552f82749bc2d4d394ffb3ec8838b9a4302bbccbd2b9d79d96d04938fd"
+        }
+    ]
+}
