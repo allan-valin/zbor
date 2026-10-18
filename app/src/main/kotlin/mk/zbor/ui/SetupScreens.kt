@@ -3,6 +3,9 @@ package mk.zbor.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -45,7 +48,8 @@ interface SetupActions {
 @Composable
 fun SetupScreen(state: SetupState, totalBytes: Long, packDir: File, actions: SetupActions) {
     Column(
-        Modifier.fillMaxSize().padding(24.dp).verticalScroll(rememberScrollState()).testTag("setup"),
+        Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing).padding(24.dp)
+            .verticalScroll(rememberScrollState()).testTag("setup"),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text("Preparar o Zbor", style = MaterialTheme.typography.headlineMedium)

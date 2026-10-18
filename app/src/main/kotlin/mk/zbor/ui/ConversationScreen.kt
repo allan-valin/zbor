@@ -4,7 +4,12 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -72,6 +77,7 @@ interface ConversationActions {
 private val Recording = Color(0xFFE53935)
 private val Confirm = Color(0xFF43A047)
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ConversationScreen(
     ui: ConversationUi,
@@ -79,11 +85,24 @@ fun ConversationScreen(
     slowMode: Boolean,
     actions: ConversationActions,
 ) {
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    // Edge-to-edge (targetSdk 36): keep clear of the system bars and of the keyboard,
+    // and while one side types give it most of what the keyboard leaves.
+    val typing = WindowInsets.isImeVisible
+    val typingSide = if (typing) ui.speaker?.let { s ->
+        if (ui.phase == Phase.REVIEWING) s.other else s
+    } else null
+    Column(
+        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+            .windowInsetsPadding(WindowInsets.safeDrawing)
+    ) {
         // The top half faces the person across the table.
-        SideHalf(Side.TOP, ui, micAllowed, actions, Modifier.weight(1f).rotate(180f))
+        val topCompact = typingSide == Side.BOTTOM
+        val bottomCompact = typingSide == Side.TOP
+        SideHalf(Side.TOP, ui, micAllowed, actions, topCompact,
+            (if (topCompact) Modifier else Modifier.weight(1f)).rotate(180f))
         MiddleBar(ui, slowMode, actions)
-        SideHalf(Side.BOTTOM, ui, micAllowed, actions, Modifier.weight(1f))
+        SideHalf(Side.BOTTOM, ui, micAllowed, actions, bottomCompact,
+            if (bottomCompact) Modifier else Modifier.weight(1f))
     }
 }
 
@@ -114,6 +133,8 @@ private fun SideHalf(
     ui: ConversationUi,
     micAllowed: Boolean,
     actions: ConversationActions,
+    /** While the other side types: only language and status, to leave room above the keyboard. */
+    compact: Boolean,
     modifier: Modifier,
 ) {
     val me = ui.side(side)
@@ -153,6 +174,7 @@ private fun SideHalf(
         }
 
         StatusLine(side, ui, micAllowed, words)
+        if (compact) return@Column
 
         Box(Modifier.weight(1f).fillMaxWidth().padding(vertical = 8.dp)) {
             if (editable) {

@@ -44,8 +44,11 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-            // Native code is slow unoptimised; debug builds still get -O3 from CMake.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Personal sideload build: signed with the debug key until a real keystore exists.
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
