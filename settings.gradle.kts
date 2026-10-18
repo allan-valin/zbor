@@ -1,2 +1,2 @@
 rootProject.name = "zbor"
-include(":core")
+include(":core", ":mt")
