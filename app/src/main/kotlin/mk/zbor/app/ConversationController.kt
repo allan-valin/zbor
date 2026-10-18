@@ -73,8 +73,12 @@ class ConversationController(
     private val work: CoroutineDispatcher,
     outputSeam: Boolean = false,
     faceToFace: Boolean = false,
+    /** The phone owner's language, shown on the bottom half; Macedonian sits on top. */
+    homeLang: Lang = Lang.PT,
 ) {
-    private val _state = MutableStateFlow(ConversationUi(outputSeam = outputSeam, faceToFace = faceToFace))
+    private val _state = MutableStateFlow(
+        ConversationUi(bottom = SideUi(homeLang), outputSeam = outputSeam, faceToFace = faceToFace),
+    )
     val state: StateFlow<ConversationUi> = _state
 
     private var orchestrator = orchestratorFor(outputSeam)
@@ -138,6 +142,17 @@ class ConversationController(
         if (_state.value.busy || _state.value.phase == Phase.RECORDING) return
         orchestrator = orchestratorFor(on)
         _state.update { it.copy(outputSeam = on, phase = Phase.IDLE, speaker = null) }
+    }
+
+    /** One-sided (non-mirrored) use: flip the translation direction, keeping what is on screen. */
+    fun swapLangs() {
+        if (_state.value.busy || _state.value.phase == Phase.RECORDING) return
+        _state.update {
+            it.copy(
+                top = it.bottom, bottom = it.top, phase = Phase.IDLE, speaker = null,
+                replaySide = it.replaySide?.other,
+            )
+        }
     }
 
     fun setFaceToFace(on: Boolean) {
@@ -213,4 +228,11 @@ class ConversationController(
     }
 
     private fun langOf(side: Side) = _state.value.side(side).lang
+}
+
+/** The bottom half's default language from the phone's locale (English when it is none of ours). */
+fun homeLangFor(locale: java.util.Locale): Lang = when (locale.language) {
+    "pt" -> Lang.PT
+    "de" -> Lang.DE
+    else -> Lang.EN
 }

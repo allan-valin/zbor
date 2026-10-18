@@ -12,6 +12,6 @@ internal object EspeakNative {
     init { System.loadLibrary("zbor_native") }
     /** [dataParent] is the directory that contains `espeak-ng-data`. Returns the sample rate, or ≤0. */
     external fun init(dataParent: String): Int
-    external fun synth(text: String, voice: String): ShortArray?
+    external fun synth(text: String, voice: String, wordsPerMinute: Int): ShortArray?
     external fun terminate()
 }

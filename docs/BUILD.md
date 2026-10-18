@@ -46,6 +46,14 @@ Upload every file in `~/zbor-build/pack-release/` as assets of a GitHub Release 
 the release files by USB into `Android/data/mk.zbor/files/models/` (the zip is
 extracted on the next check) or into any folder and use *Importar de uma pasta…*.
 
+The README's tester links expect the APK as an asset named **`zbor-0.1.0.apk`** on
+the repo's *latest* release (e.g. tag `v0.1.0`):
+`cp app/build/outputs/apk/release/app-release.apk zbor-0.1.0.apk`.
+
+On a real Android 16 phone, files `adb push`ed into `Android/data/mk.zbor/…` are
+invisible to the app; push to `/sdcard/Download/zbor-pack` and use *Import from a
+folder…* instead (the emulator tolerates the direct push).
+
 ## 6. App builds
 - `./gradlew :app:assembleDebug` — both ABIs, for the emulator.
 - `./gradlew :app:assembleRelease` — R8-minified, ~50 MB, signed with the debug key

@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.FilledIconButton
@@ -60,6 +61,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import mk.zbor.R
 import mk.zbor.app.ConversationUi
 import mk.zbor.app.Phase
 import mk.zbor.app.Side
@@ -74,6 +77,7 @@ interface ConversationActions {
     fun replay(side: Side)
     fun setLang(side: Side, lang: Lang)
     fun setFaceToFace(on: Boolean)
+    fun swapLangs()
     fun openSettings()
 }
 
@@ -101,10 +105,11 @@ fun ConversationScreen(
         // Face-to-face mode mirrors the top half for the person across the table.
         val topCompact = typingSide == Side.BOTTOM
         val bottomCompact = typingSide == Side.TOP
-        SideHalf(Side.TOP, ui, micAllowed, actions, topCompact,
+        // Without face-to-face only the bottom half takes input; the top shows the translation.
+        SideHalf(Side.TOP, ui, micAllowed, actions, topCompact, controls = ui.faceToFace,
             (if (topCompact) Modifier else Modifier.weight(1f)).rotate(if (ui.faceToFace) 180f else 0f))
         MiddleBar(ui, slowMode, actions)
-        SideHalf(Side.BOTTOM, ui, micAllowed, actions, bottomCompact,
+        SideHalf(Side.BOTTOM, ui, micAllowed, actions, bottomCompact, controls = true,
             if (bottomCompact) Modifier else Modifier.weight(1f))
     }
 }
@@ -120,17 +125,25 @@ private fun MiddleBar(ui: ConversationUi, slowMode: Boolean, actions: Conversati
                 FilterChip(
                     selected = ui.faceToFace,
                     onClick = { actions.setFaceToFace(!ui.faceToFace) },
-                    label = { Text("Frente a frente") },
+                    label = { Text(stringResource(R.string.face_to_face)) },
                     leadingIcon = { Icon(Icons.Default.RecordVoiceOver, null) },
                     modifier = Modifier.testTag("face-to-face"),
                 )
+                if (!ui.faceToFace) {
+                    FilledTonalIconButton(
+                        onClick = actions::swapLangs,
+                        enabled = !ui.busy && ui.phase != Phase.RECORDING,
+                        modifier = Modifier.padding(start = 8.dp).testTag("swap"),
+                    ) { Icon(Icons.Default.SwapVert, contentDescription = "⇅") }
+                }
                 Text(
-                    if (slowMode) "  modo lento (pouca memória)" else "",
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.weight(1f),
+                    if (slowMode) stringResource(R.string.slow_mode) else "",
+                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 2,
+                    modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
                 )
                 FilledTonalIconButton(onClick = actions::openSettings, modifier = Modifier.testTag("settings")) {
-                    Icon(Icons.Default.Settings, contentDescription = "Configurações")
+                    Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
                 }
             }
         }
@@ -145,6 +158,8 @@ private fun SideHalf(
     actions: ConversationActions,
     /** While the other side types: only language and status, to leave room above the keyboard. */
     compact: Boolean,
+    /** Mic, keyboard and ✓; off for the output-only top half outside face-to-face mode. */
+    controls: Boolean,
     modifier: Modifier,
 ) {
     val me = ui.side(side)
@@ -183,7 +198,7 @@ private fun SideHalf(
             }
         }
 
-        StatusLine(side, ui, micAllowed, words)
+        if (controls) StatusLine(side, ui, micAllowed, words)
         if (compact) return@Column
 
         Box(Modifier.weight(1f).fillMaxWidth().padding(vertical = 8.dp)) {
@@ -207,7 +222,7 @@ private fun SideHalf(
             }
         }
 
-        Row(
+        if (controls) Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,

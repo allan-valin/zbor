@@ -22,11 +22,12 @@ Java_mk_zbor_engines_EspeakNative_init(JNIEnv *env, jobject, jstring dataParent)
 }
 
 extern "C" JNIEXPORT jshortArray JNICALL
-Java_mk_zbor_engines_EspeakNative_synth(JNIEnv *env, jobject, jstring text, jstring voice) {
+Java_mk_zbor_engines_EspeakNative_synth(JNIEnv *env, jobject, jstring text, jstring voice, jint wordsPerMinute) {
     const char *v = env->GetStringUTFChars(voice, nullptr);
     espeak_ERROR vr = espeak_SetVoiceByName(v);
     env->ReleaseStringUTFChars(voice, v);
     if (vr != EE_OK) return nullptr;
+    espeak_SetParameter(espeakRATE, wordsPerMinute, 0); // after the voice: setting a voice resets the rate
 
     const char *t = env->GetStringUTFChars(text, nullptr);
     std::vector<short> out;

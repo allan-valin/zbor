@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity() {
             override fun replay(side: Side) = vm.controller.replay(side)
             override fun setLang(side: Side, lang: Lang) = vm.controller.setLang(side, lang)
             override fun setFaceToFace(on: Boolean) = vm.setFaceToFace(on)
+            override fun swapLangs() = vm.controller.swapLangs()
             override fun openSettings() { settingsOpen = true }
         }
         val setupActions = object : SetupActions {
@@ -78,7 +79,12 @@ class MainActivity : ComponentActivity() {
                     val slow by vm.slowMode.collectAsState()
                     ConversationScreen(ui, micAllowed, slow != null, actions)
                     if (settingsOpen) {
-                        SettingsDialog(ui.outputSeam, vm.controller::setOutputSeam, pack.dir) { settingsOpen = false }
+                        val rate by vm.speechRate.collectAsState()
+                        SettingsDialog(
+                            ui.outputSeam, vm.controller::setOutputSeam,
+                            rate, vm::setSpeechRate, vm::previewVoice,
+                            pack.dir,
+                        ) { settingsOpen = false }
                     }
                 }
             }
@@ -91,6 +97,10 @@ class MainActivity : ComponentActivity() {
     @Deprecated("Deprecated in Java")
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) vm.onTrimMemory()
+        // Only real pressure while we are in front. UI_HIDDEN/BACKGROUND (e.g. the folder
+        // picker is open) are not pressure: stepping colder there slowed a 12 GB phone.
+        if (level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW || level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
+            vm.onTrimMemory()
+        }
     }
 }

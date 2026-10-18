@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="setup_title">Zbor einrichten</string>
+    <string name="setup_intro">Zbor übersetzt ohne Internet, muss aber einmal die Sprach- und Übersetzungsmodelle herunterladen (%1$s). Bitte WLAN verwenden. Bricht die Verbindung ab, geht der Download dort weiter, wo er aufgehört hat.</string>
+    <string name="file_ok">ok</string>
+    <string name="file_missing">fehlt</string>
+    <string name="file_bad">beschädigt, wird neu geladen</string>
+    <string name="download">Herunterladen</string>
+    <string name="download_metered">Trotzdem herunterladen (mobile Daten)</string>
+    <string name="pause">Pause</string>
+    <string name="import_folder">Aus einem Ordner importieren…</string>
+    <string name="verify_again">Dateien erneut prüfen</string>
+    <string name="offline_hint">Kein WLAN? Die Paketdateien in einen beliebigen Ordner auf dem Handy kopieren (z. B. Download/zbor-pack, per USB-Kabel oder SD-Karte) und „Aus einem Ordner importieren…“ verwenden.</string>
+    <string name="mb_of_mb">%1$s von %2$s</string>
+    <string name="ready">Fertig.</string>
+    <string name="checking">Dateien werden geprüft…</string>
+    <string name="checking_deep">Jede Datei wird geprüft (kann eine Minute dauern)…</string>
+    <string name="downloading">Wird heruntergeladen…</string>
+    <string name="importing">Wird importiert…</string>
+    <string name="metered_warning">Du bist im Mobilfunknetz. Das Paket hat %1$s; WLAN ist besser.</string>
+    <string name="download_paused">Download pausiert. Auf „Herunterladen“ tippen, um fortzusetzen.</string>
+    <string name="download_interrupted">Download unterbrochen (%1$s). Auf „Herunterladen“ tippen, um dort fortzusetzen, wo er aufgehört hat.</string>
+    <string name="import_result">Importiert: %1$d.</string>
+    <string name="import_rejected"> Nicht wie erwartet (beschädigt?): %1$s.</string>
+    <string name="import_absent"> Nicht im Ordner: %1$s.</string>
+    <string name="import_failed">Import fehlgeschlagen: %1$s</string>
+    <string name="face_to_face">Gegenüber</string>
+    <string name="slow_mode">Langsamer Modus (wenig Speicher)</string>
+    <string name="settings">Einstellungen</string>
+    <string name="close">Schließen</string>
+    <string name="review_translation">Übersetzung vor dem Sprechen prüfen</string>
+    <string name="review_translation_hint">Zeigt die Übersetzung bearbeitbar auf der anderen Hälfte; gesprochen wird erst nach ✓.</string>
+    <string name="models_at">Modelle: %1$s</string>
+    <string name="speech_speed">Sprechgeschwindigkeit</string>
+    <string name="speech_speed_value">%1$d Wörter pro Minute — normal sind 175</string>
+    <string name="play_example">Beispiel anhören</string>
+</resources>

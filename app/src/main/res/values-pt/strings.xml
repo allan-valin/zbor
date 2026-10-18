@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Português do Brasil. -->
+<resources>
+    <string name="setup_title">Preparar o Zbor</string>
+    <string name="setup_intro">O Zbor traduz sem internet, mas precisa baixar uma vez os modelos de fala e tradução (%1$s). Use Wi-Fi. Se a conexão cair, o download continua de onde parou.</string>
+    <string name="file_ok">ok</string>
+    <string name="file_missing">falta</string>
+    <string name="file_bad">corrompido, será baixado de novo</string>
+    <string name="download">Baixar</string>
+    <string name="download_metered">Baixar mesmo assim (rede móvel)</string>
+    <string name="pause">Pausar</string>
+    <string name="import_folder">Importar de uma pasta…</string>
+    <string name="verify_again">Conferir os arquivos de novo</string>
+    <string name="offline_hint">Sem Wi-Fi? Copie os arquivos do pacote para qualquer pasta do celular (por exemplo Download/zbor-pack, pelo cabo USB ou cartão SD) e use “Importar de uma pasta…”.</string>
+    <string name="mb_of_mb">%1$s de %2$s</string>
+    <string name="ready">Pronto.</string>
+    <string name="checking">Verificando os arquivos…</string>
+    <string name="checking_deep">Conferindo cada arquivo (pode levar um minuto)…</string>
+    <string name="downloading">Baixando…</string>
+    <string name="importing">Importando…</string>
+    <string name="metered_warning">Você está em rede móvel. O pacote tem %1$s; prefira Wi-Fi.</string>
+    <string name="download_paused">Download pausado. Toque em Baixar para continuar de onde parou.</string>
+    <string name="download_interrupted">Download interrompido (%1$s). Toque em Baixar para continuar de onde parou.</string>
+    <string name="import_result">Importados: %1$d.</string>
+    <string name="import_rejected"> Diferentes do esperado (corrompidos?): %1$s.</string>
+    <string name="import_absent"> Não estavam na pasta: %1$s.</string>
+    <string name="import_failed">Falha ao importar: %1$s</string>
+    <string name="face_to_face">Frente a frente</string>
+    <string name="slow_mode">Modo lento (pouca memória)</string>
+    <string name="settings">Configurações</string>
+    <string name="close">Fechar</string>
+    <string name="review_translation">Revisar a tradução antes de falar</string>
+    <string name="review_translation_hint">Mostra a tradução editável do outro lado; só fala depois do ✓.</string>
+    <string name="models_at">Modelos: %1$s</string>
+    <string name="speech_speed">Velocidade da voz</string>
+    <string name="speech_speed_value">%1$d palavras por minuto — o normal é 175</string>
+    <string name="play_example">Ouvir exemplo</string>
+</resources>

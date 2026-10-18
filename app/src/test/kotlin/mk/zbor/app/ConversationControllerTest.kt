@@ -196,3 +196,29 @@ class ConversationControllerTest {
         assertTrue(!c.state.value.faceToFace)
     }
 }
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class SwapTest {
+    @Test fun `swap exchanges the two languages and their texts`() = runTest {
+        val c = ConversationController(
+            orchestratorFor = { seam -> PipelineOrchestrator(Stt(), Mt(), Tts(), seam) },
+            recorder = FakeRecorder(), player = FakePlayer(), scope = this, work = StandardTestDispatcher(testScheduler),
+        )
+        c.startTyping(Side.BOTTOM); c.edit(Side.BOTTOM, "oi"); c.confirm(Side.BOTTOM); advanceUntilIdle()
+        c.swapLangs()
+        assertEquals(Lang.PT, c.state.value.top.lang)
+        assertEquals(Lang.MK, c.state.value.bottom.lang)
+        assertEquals("oi", c.state.value.top.text)
+        assertEquals("MK:oi", c.state.value.bottom.text)
+        assertTrue(c.state.value.canReplay(Side.BOTTOM))
+    }
+}
+
+class HomeLangTest {
+    @Test fun `bottom half follows the phone language, English otherwise`() {
+        assertEquals(Lang.PT, homeLangFor(java.util.Locale.forLanguageTag("pt-BR")))
+        assertEquals(Lang.DE, homeLangFor(java.util.Locale.GERMANY))
+        assertEquals(Lang.EN, homeLangFor(java.util.Locale.US))
+        assertEquals(Lang.EN, homeLangFor(java.util.Locale.forLanguageTag("mk-MK")))
+    }
+}

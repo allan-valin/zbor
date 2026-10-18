@@ -5,6 +5,7 @@ import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -59,6 +60,14 @@ class ConversationUiTest {
         rule.onNodeWithTag("pick-BOTTOM-DE").performClick()
         rule.waitForIdle()
         assertTrue("Deutsch" in text("lang-BOTTOM") || "Mikrofon" in text("status-BOTTOM"), text("status-BOTTOM"))
+    }
+
+    @Test fun topHalfHasControlsOnlyFaceToFace() {
+        fun topMics() = rule.onAllNodesWithTag("mic-TOP").fetchSemanticsNodes().size
+        val on = topMics() == 1
+        rule.onNodeWithTag("face-to-face").performClick(); rule.waitForIdle()
+        kotlin.test.assertEquals(if (on) 0 else 1, topMics())
+        rule.onNodeWithTag("face-to-face").performClick(); rule.waitForIdle()
     }
 
     @Test fun faceToFaceTogglesTheTopHalfMirroring() {

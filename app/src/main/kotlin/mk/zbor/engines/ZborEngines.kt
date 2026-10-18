@@ -36,6 +36,7 @@ class ZborEngines(
             pack: ModelPack,
             policy: ResidencyPolicy,
             onPolicyChange: (ResidencyPolicy) -> Unit = {},
+            speechRate: () -> Int = { EspeakTtsEngine.DEFAULT_RATE },
         ): ZborEngines {
             val mgr = ModelMgr(policy, onPolicyChange)
             val stt = ModelSlot(ModelKind.STT) { WhisperSttEngine.open(pack.whisper) }
@@ -45,7 +46,7 @@ class ZborEngines(
                 val tokenizer = pack.nllbTokenizer.inputStream().use(NllbTokenizer::readCompact)
                 NllbMtEngine.open(pack.nllbEncoder, pack.nllbDecoder, tokenizer, opts)
             }
-            val tts = ModelSlot(ModelKind.TTS) { EspeakTtsEngine.open(pack.dir) }
+            val tts = ModelSlot(ModelKind.TTS) { EspeakTtsEngine.open(pack.dir, speechRate) }
             return ZborEngines(ManagedStt(mgr, stt), ManagedMt(mgr, mt), ManagedTts(mgr, tts), mgr, listOf(stt, mt))
         }
 
