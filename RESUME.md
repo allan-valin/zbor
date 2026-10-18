@@ -38,7 +38,7 @@ no cell signal. **The whole point is Macedonian TTS** (Google deactivated theirs
 - MT + espeak for one sentence: ~2 s including a cold model load.
 
 ## Open — needs Allan
-1. **GitHub repo name** (suggest `zbor`): nothing pushed yet; the app's default pack URL assumes
+1. **Repo is public** at github.com/allan-valin/zbor (2026-10-19). Still to do: GitHub Releases; the app's default pack URL assumes
    `allan-valin/zbor`, release tag `pack-v1`. Then upload `~/zbor-build/pack-release/*`.
 2. **Real Redmi**: app + pack are on Allan's phone; still to check by him: **microphone** turns and
    real latency, keyboard auto-switch after adding Macedonian to Gboard.
