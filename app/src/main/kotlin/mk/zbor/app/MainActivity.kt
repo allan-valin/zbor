@@ -58,6 +58,7 @@ class MainActivity : ComponentActivity() {
             override fun confirm(side: Side) = vm.controller.confirm(side)
             override fun replay(side: Side) = vm.controller.replay(side)
             override fun setLang(side: Side, lang: Lang) = vm.controller.setLang(side, lang)
+            override fun setFaceToFace(on: Boolean) = vm.setFaceToFace(on)
             override fun openSettings() { settingsOpen = true }
         }
         val setupActions = object : SetupActions {

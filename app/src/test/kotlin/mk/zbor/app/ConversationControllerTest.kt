@@ -186,4 +186,13 @@ class ConversationControllerTest {
         assertEquals(Phase.FAILED, c.state.value.phase)
         assertEquals(Stage.STT, c.state.value.error?.stage)
     }
+
+    @Test fun `face-to-face mirroring is off by default and toggles`() = runTest {
+        val c = controller()
+        assertTrue(!c.state.value.faceToFace)
+        c.setFaceToFace(true)
+        assertTrue(c.state.value.faceToFace)
+        c.setFaceToFace(false)
+        assertTrue(!c.state.value.faceToFace)
+    }
 }

@@ -39,6 +39,8 @@ data class ConversationUi(
     /** The side the last translation was spoken to, which can replay it. */
     val replaySide: Side? = null,
     val outputSeam: Boolean = false,
+    /** Face-to-face voice mode: the top half is mirrored for the person opposite. Off = both halves upright. */
+    val faceToFace: Boolean = false,
 ) {
     fun side(s: Side) = if (s == Side.TOP) top else bottom
     fun canReplay(s: Side) = replaySide == s && phase != Phase.SPEAKING
@@ -70,8 +72,9 @@ class ConversationController(
     private val scope: CoroutineScope,
     private val work: CoroutineDispatcher,
     outputSeam: Boolean = false,
+    faceToFace: Boolean = false,
 ) {
-    private val _state = MutableStateFlow(ConversationUi(outputSeam = outputSeam))
+    private val _state = MutableStateFlow(ConversationUi(outputSeam = outputSeam, faceToFace = faceToFace))
     val state: StateFlow<ConversationUi> = _state
 
     private var orchestrator = orchestratorFor(outputSeam)
@@ -135,6 +138,10 @@ class ConversationController(
         if (_state.value.busy || _state.value.phase == Phase.RECORDING) return
         orchestrator = orchestratorFor(on)
         _state.update { it.copy(outputSeam = on, phase = Phase.IDLE, speaker = null) }
+    }
+
+    fun setFaceToFace(on: Boolean) {
+        _state.update { it.copy(faceToFace = on) }
     }
 
     private fun startRecording(side: Side) {

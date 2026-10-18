@@ -29,13 +29,21 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
 
     private val engines = ZborEngines.create(pack, ZborEngines.policyFor(app)) { _slowMode.value = it }
 
+    private val prefs = app.getSharedPreferences("zbor", 0)
+
     val controller = ConversationController(
         orchestratorFor = { seam -> PipelineOrchestrator(engines.stt, engines.mt, engines.tts, seam) },
         recorder = MicRecorder(),
         player = player,
         scope = viewModelScope,
         work = work,
+        faceToFace = prefs.getBoolean(FACE_TO_FACE, false),
     )
+
+    fun setFaceToFace(on: Boolean) {
+        controller.setFaceToFace(on)
+        prefs.edit().putBoolean(FACE_TO_FACE, on).apply()
+    }
 
     init {
         viewModelScope.launch(work) { runCatching { engines.warmUp() } }
@@ -44,6 +52,8 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
     fun onTrimMemory() {
         viewModelScope.launch(work) { engines.models.onMemoryPressure() }
     }
+
+    private companion object { const val FACE_TO_FACE = "faceToFace" }
 
     override fun onCleared() {
         player.stop()

@@ -27,12 +27,14 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
+import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -71,6 +73,7 @@ interface ConversationActions {
     fun confirm(side: Side)
     fun replay(side: Side)
     fun setLang(side: Side, lang: Lang)
+    fun setFaceToFace(on: Boolean)
     fun openSettings()
 }
 
@@ -95,11 +98,11 @@ fun ConversationScreen(
         Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
             .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
-        // The top half faces the person across the table.
+        // Face-to-face mode mirrors the top half for the person across the table.
         val topCompact = typingSide == Side.BOTTOM
         val bottomCompact = typingSide == Side.TOP
         SideHalf(Side.TOP, ui, micAllowed, actions, topCompact,
-            (if (topCompact) Modifier else Modifier.weight(1f)).rotate(180f))
+            (if (topCompact) Modifier else Modifier.weight(1f)).rotate(if (ui.faceToFace) 180f else 0f))
         MiddleBar(ui, slowMode, actions)
         SideHalf(Side.BOTTOM, ui, micAllowed, actions, bottomCompact,
             if (bottomCompact) Modifier else Modifier.weight(1f))
@@ -114,8 +117,15 @@ private fun MiddleBar(ui: ConversationUi, slowMode: Boolean, actions: Conversati
                 if (ui.busy) LinearProgressIndicator(Modifier.fillMaxWidth().testTag("busy"))
             }
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                FilterChip(
+                    selected = ui.faceToFace,
+                    onClick = { actions.setFaceToFace(!ui.faceToFace) },
+                    label = { Text("Frente a frente") },
+                    leadingIcon = { Icon(Icons.Default.RecordVoiceOver, null) },
+                    modifier = Modifier.testTag("face-to-face"),
+                )
                 Text(
-                    if (slowMode) "Zbor · modo lento (pouca memória)" else "Zbor",
+                    if (slowMode) "  modo lento (pouca memória)" else "",
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.weight(1f),
                 )

@@ -60,4 +60,16 @@ class ConversationUiTest {
         rule.waitForIdle()
         assertTrue("Deutsch" in text("lang-BOTTOM") || "Mikrofon" in text("status-BOTTOM"), text("status-BOTTOM"))
     }
+
+    @Test fun faceToFaceTogglesTheTopHalfMirroring() {
+        fun topRotated() = rule.onNodeWithTag("half-TOP").fetchSemanticsNode().let { n ->
+            // A rotated half's bounds are unchanged, so compare where its first child (the language chip) sits.
+            rule.onNodeWithTag("lang-TOP").fetchSemanticsNode().boundsInRoot.top > n.boundsInRoot.center.y
+        }
+        val wasOn = topRotated()
+        rule.onNodeWithTag("face-to-face").performClick(); rule.waitForIdle()
+        kotlin.test.assertNotEquals(wasOn, topRotated())
+        rule.onNodeWithTag("face-to-face").performClick(); rule.waitForIdle()
+        kotlin.test.assertEquals(wasOn, topRotated())
+    }
 }
