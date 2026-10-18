@@ -7,7 +7,9 @@ step time. This rewrite:
   * stores the transposed int8 weight once as a top-level initializer,
   * makes both branches output the final hidden state instead of logits,
   * computes logits once, after the If, with DynamicQuantizeLinear + MatMulInteger
-    (a top-level constant, so ONNX Runtime prepacks it at load).
+    (a top-level constant, so ONNX Runtime prepacks it at load),
+  * looks token embeddings up as columns of that same transposed weight, so the
+    original 262 MB copy can be dropped from the pack (20% of it).
 
     ~/zbor-build/.venv/bin/python -I tools/fix_lm_head.py IN.onnx OUT.onnx
 """
@@ -46,6 +48,26 @@ for attr in if_node.attribute:
     out.type.tensor_type.shape.dim[2].ClearField("dim_param")
 assert if_node.output[0] == "logits"
 if_node.output[0] = LM_HIDDEN
+
+# Embedding lookup: Gather(W, ids) [b,s,1024]  ==  Transpose(Gather(W_T, ids, axis=1) [1024,b,s])
+for attr in if_node.attribute:
+    branch = attr.g
+    nodes = list(branch.node)
+    i = next(k for k, n in enumerate(nodes) if n.op_type == "Gather" and n.input[0] == W)
+    gather = nodes[i]
+    cols = gather.output[0] + "_cols"
+    nodes[i:i + 1] = [
+        helper.make_node("Gather", [W_T, gather.input[1]], [cols], axis=1, name=gather.name + "_cols"),
+        helper.make_node("Transpose", [cols], [gather.output[0]], perm=[1, 2, 0], name=gather.name + "_t"),
+    ]
+    del branch.node[:]
+    branch.node.extend(nodes)
+
+def uses(graph, name):
+    return any(name in n.input or any(uses(a.g, name) for a in n.attribute if a.type == onnx.AttributeProto.GRAPH)
+               for n in graph.node)
+assert not uses(g, W), "original embedding still referenced"
+g.initializer.remove(weight)
 
 g.node.extend([
     helper.make_node("DynamicQuantizeLinear", [LM_HIDDEN], ["lm_q", "lm_q_scale", "lm_q_zp"], name="lm_head/quant"),
