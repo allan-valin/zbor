@@ -7,18 +7,18 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertTrue
 
-/** Real int8 NLLB on the desktop runtime; expectations come from the fp32 spike (spikes/mt_out.txt). */
+/** The real pack model (int8, LM head hoisted, .ort) on the desktop runtime; expectations come from the fp32 spike (spikes/mt_out.txt). */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class NllbMtEngineTest {
     private val engine by lazy {
         NllbMtEngine.open(
-            Models.file("encoder_model_quantized.onnx"),
-            Models.file("decoder_model_merged_quantized.onnx"),
-            NllbTokenizer.fromTokenizerJson(Models.file("tokenizer.json")),
+            Models.pack("nllb-encoder.ort"),
+            Models.pack("nllb-decoder.ort"),
+            Models.pack("nllb-tokenizer.bin").inputStream().use(NllbTokenizer::readCompact),
         )
     }
 
-    @AfterAll fun close() { if (Models.dir.isDirectory) engine.close() }
+    @AfterAll fun close() { if (Models.pack.isDirectory) engine.close() }
 
     @Test fun `en to mk plain sentence`() {
         assertContains(engine.translate("Where is the bus station?", Lang.EN, Lang.MK).lowercase(), "автобуск")

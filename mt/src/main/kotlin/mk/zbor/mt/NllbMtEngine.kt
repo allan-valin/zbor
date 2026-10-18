@@ -8,6 +8,9 @@ import mk.zbor.core.Lang
 import mk.zbor.core.MtEngine
 import mk.zbor.core.Stage
 import java.io.File
+import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import java.nio.channels.FileChannel
 import java.nio.FloatBuffer
 import java.nio.LongBuffer
 
@@ -21,6 +24,8 @@ class NllbMtEngine(
     private val decoder: OrtSession,
     private val tokenizer: NllbTokenizer,
     private val maxTokens: Int = 200,
+    /** Mapped model files the sessions read weights from directly; must outlive them. */
+    @Suppress("unused") private val mapped: List<ByteBuffer> = emptyList(),
 ) : MtEngine, AutoCloseable {
     private val env = OrtEnvironment.getEnvironment()
     private val pastNames = decoder.inputNames.filter { it.startsWith("past_key_values.") }
@@ -115,6 +120,11 @@ class NllbMtEngine(
     companion object {
         private const val EOS = 2
 
+        /**
+         * Opens the pack's `.ort` files memory-mapped: ONNX Runtime uses the weights
+         * in place, so they stay file-backed pages the OS can reclaim instead of
+         * ~1 GB of copied heap. Plain `.onnx` files load the normal (copying) way.
+         */
         fun open(
             encoder: File,
             decoder: File,
@@ -122,11 +132,17 @@ class NllbMtEngine(
             options: OrtSession.SessionOptions = OrtSession.SessionOptions(),
         ): NllbMtEngine {
             val env = OrtEnvironment.getEnvironment()
-            return NllbMtEngine(
-                env.createSession(encoder.path, options),
-                env.createSession(decoder.path, options),
-                tokenizer,
-            )
+            val mapped = mutableListOf<ByteBuffer>()
+            fun session(f: File): OrtSession = if (f.name.endsWith(".ort")) {
+                val buf = RandomAccessFile(f, "r").use { it.channel.map(FileChannel.MapMode.READ_ONLY, 0, f.length()) }
+                mapped += buf
+                env.createSession(buf, options)
+            } else {
+                env.createSession(f.path, options)
+            }
+            options.addConfigEntry("session.use_ort_model_bytes_directly", "1")
+            options.addConfigEntry("session.use_ort_model_bytes_for_initializers", "1")
+            return NllbMtEngine(session(encoder), session(decoder), tokenizer, mapped = mapped)
         }
     }
 }

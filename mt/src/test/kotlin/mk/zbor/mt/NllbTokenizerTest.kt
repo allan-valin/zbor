@@ -11,7 +11,7 @@ class NllbTokenizerTest {
         .lines().filter { it.isNotBlank() }
         .map { line -> line.split("\t").let { it[0] to it[1].split(" ").map(String::toInt) } }
 
-    private val tok by lazy { NllbTokenizer.fromTokenizerJson(Models.file("tokenizer.json")) }
+    private val tok by lazy { NllbTokenizer.fromTokenizerJson(Models.source("tokenizer.json")) }
 
     @Test fun `encode matches the HF tokenizer on every golden sentence`() {
         for ((text, ids) in goldens) assertEquals(ids, tok.encode(text, Lang.EN), text)
