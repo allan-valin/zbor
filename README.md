@@ -124,6 +124,13 @@ conversation across a table — each person uses their own half.
 Each half shows its hints in its own language, so the Macedonian speaker only
 ever needs to read Macedonian.
 
+**Keyboard:** when you type on a half, Zbor asks the keyboard for that half's
+language (Cyrillic for Macedonian). The keyboard can only switch to layouts it
+has, so add Macedonian once: in **Gboard** → ⚙ *Settings → Languages → Add
+keyboard → Macedonian (Македонски)*; on Samsung Keyboard → *Languages and types
+→ Manage input languages*. Without it, switch layouts by hand (🌐 or swipe the
+space bar).
+
 ---
 
 ## What to test and how to report it
