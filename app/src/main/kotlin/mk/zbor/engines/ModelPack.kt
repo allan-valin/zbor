@@ -14,6 +14,10 @@ class ModelPack(val dir: File) {
     val nllbTokenizer = File(dir, "nllb-tokenizer.bin")
     val espeakData = File(dir, "espeak-ng-data")
 
+    /** Files the engines need that are not there yet (empty = ready). */
+    fun missing(): List<File> =
+        listOf(whisper, nllbEncoder, nllbDecoder, nllbTokenizer, File(espeakData, "phondata")).filterNot { it.isFile }
+
     companion object {
         fun location(context: Context) = ModelPack(File(context.getExternalFilesDir(null), "models"))
     }

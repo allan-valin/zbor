@@ -22,7 +22,13 @@ class ZborEngines(
     val mt: MtEngine,
     val tts: TtsEngine,
     val models: ModelMgr,
+    private val slots: List<ModelSlot<*>>,
 ) : AutoCloseable {
+    /** Loads what the policy keeps resident, so the first turn does not pay for it. */
+    fun warmUp() {
+        for (slot in slots) if (slot.kind in models.policy.keeps) models.use(slot) {}
+    }
+
     override fun close() = models.close()
 
     companion object {
@@ -40,7 +46,7 @@ class ZborEngines(
                 NllbMtEngine.open(pack.nllbEncoder, pack.nllbDecoder, tokenizer, opts)
             }
             val tts = ModelSlot(ModelKind.TTS) { EspeakTtsEngine.open(pack.dir) }
-            return ZborEngines(ManagedStt(mgr, stt), ManagedMt(mgr, mt), ManagedTts(mgr, tts), mgr)
+            return ZborEngines(ManagedStt(mgr, stt), ManagedMt(mgr, mt), ManagedTts(mgr, tts), mgr, listOf(stt, mt))
         }
 
         fun policyFor(context: Context): ResidencyPolicy {
