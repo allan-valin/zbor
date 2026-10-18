@@ -7,44 +7,33 @@ Offline Android/Kotlin split-screen conversation translator, Macedonian ↔
 pt-br/en/de, for talking in person with a Macedonian-only speaker where there is
 no cell signal. **The whole point is Macedonian TTS** (Google deactivated theirs).
 
-## Status: SP1 · M1 DONE (2026-10-18)
-- `:core` module built: `./gradlew :core:test` → 13 tests green (6 commits).
-- Deviation from plan: `AwaitingOutputConfirm` carries `sttText` so `Done.sttText`
-  stays the speaker's words after an output-seam edit (plan set it to the translation).
-- Gradle wrapper 8.13, Kotlin 2.0.21, JDK 21.
-- **Spec (approved):** `docs/superpowers/specs/2026-07-19-offline-mk-conversation-translator-design.md`
-- **Plan (ready to execute):** `docs/superpowers/plans/2026-07-19-sp1-m1-pipeline-core.md`
-- **Spikes (done):** `spikes/` — see findings below.
+## Status: SP1 (the app) M1–M4 DONE 2026-10-18 — NOT yet run on the real Redmi
+- **M1** `:core` pipeline + edit seam, ModelMgr (HOT/WARM/COLD), typed turns, TTS-failure keeps translation.
+- **M2** real engines: whisper.cpp + espeak-ng via JNI (`app/src/main/cpp`), NLLB-600M int8 over
+  ONNX Runtime (`:mt`, own tokenizer matching HF exactly). Pack graph surgery (`tools/fix_lm_head.py`):
+  peak RAM 3.1 → 1.47 GB, 2.3 → 0.22 s per sentence on desktop, pack 1.3 → 1.1 GB.
+- **M3** split-screen Compose UI (top half rotated), per-half language/status in that half's language,
+  mic with level ring, edit seam, ✓, replay, settings (output seam), keyboard-safe layout.
+- **M4** first-run setup: resumable sha256-checked download, mobile-data warning, pause, folder import,
+  USB-sideload detection (`:pack`).
+- Tests: JVM core 26 / mt 10 / pack 10 / app 12; instrumented 8 on the x86_64 emulator
+  (engines, UI turn, wiped-pack download → conversation). R8 release smoke-tested by hand.
+- Build/recreate everything: `docs/BUILD.md`. Plans: `docs/superpowers/plans/`.
 
-## Key findings from spikes (2026-07-19)
-1. **No free offline Macedonian neural TTS exists** (MMS lacks mk, confirmed 3
-   ways). → ship `espeak-ng` (robotic) behind a swappable `TtsEngine`; the real
-   deliverable is a **trained mk voice (SP2)**.
-2. **NLLB** translates plain sentences well, idioms literally. Good enough for
-   survival talk; idiom fix = v2 LLM translator.
-3. **mk voice data:** only ~10h multi-speaker FLEURS (+ small Common Voice mk).
-   No single-speaker corpus. Recording our own = REJECTED (too big an ask).
-   SP2 path = finetune Bulgarian MMS-TTS on FLEURS/CV mk; fallback multi-speaker VITS.
+## Measured on the emulator (x86_64, no SIMD flags — the phone build has dotprod/fp16)
+- whisper small: 15 s for 11 s of audio (expect far less on the Dimensity).
+- MT + espeak for one sentence: ~2 s including a cold model load.
 
-## Decisions locked
-- Native Android/Kotlin. Offline-first (online = v2). Target Redmi Note 15 Pro 5G (HOT RAM policy).
-- Pipeline: whisper.cpp STT → **edit seam** (correct text) → NLLB-600M → TTS → autoplay.
-- Model pack hosted on **GitHub Releases** (user `allan-valin`), one-time home-wifi download, sideload fallback.
-- Work split: **SP1** = the app (espeak backend, shippable MVP); **SP2** = trained mk voice.
-- SP1 milestones: **M1** pipeline+edit-seam core (planned, pure-Kotlin), M2 real engines+ModelMgr, M3 UI, M4 delivery.
+## Open — needs Allan
+1. **GitHub repo name** (suggest `zbor`): nothing pushed yet; the app's default pack URL assumes
+   `allan-valin/zbor`, release tag `pack-v1`. Then upload `~/zbor-build/pack-release/*`.
+2. **Real Redmi pass**: install `app/build/outputs/apk/release/app-release.apk`, sideload or download
+   the pack, test the **microphone** path (cannot run on the headless emulator) and real latency.
+3. **Macedonian strings** in `app/src/main/kotlin/mk/zbor/ui/SideText.kt` were written by Claude —
+   need a native check (fold into the batched native eval set).
+4. Licence note: NLLB weights are CC-BY-NC-4.0 (open-weight, non-commercial) — fine for a free personal app.
 
-## Next action when you return
-Write the **M2 plan** (real engines + ModelMgr, Android `:app` + native):
-whisper.cpp JNI, NLLB via ONNX Runtime, espeak-ng JNI. JNI/NNAPI unknowns live
-there — spike the riskiest engine first before planning the rest.
-
-## Open items / asks for later
-- Confirm a GitHub repo name for Zbor (portfolio) before first push — repo is
-  local-only right now, not pushed.
-- SP2: decide when to start the mk voice training (needs the FLEURS/CV data pull
-  + a native-speaker batched eval set designed up front).
-
-## Other apps (context)
-- App #1: workout app (`workout-app/`).
-- App #3 (deferred): speech-to-IPA — Allan already has a survey paper + the
-  `github.com/allan-valin/phonetic-eval` benchmark repo.
+## Known limits / next
+- Typing on the TOP (rotated) half: the system keyboard is not rotated — voice is the primary path.
+- Download runs while the setup screen is open (resumes after interruptions; no background service).
+- SP2 (trained Macedonian voice) = its own spec → plan cycle; swaps in behind `TtsEngine`.
