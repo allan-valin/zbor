@@ -14,10 +14,10 @@ first unchecked item and keep going until all are checked or Allan says he woke 
 - [x] M2a check availability + licences: FLEURS mk, Common Voice mk, MMS-TTS bul
 - [x] M2b download FLEURS mk (~2.6 GB) into ~/zbor-build/voice-data (resumable, background)
 - [x] M2c clip stats: speakers, durations, SNR estimate; pick clean subset; manifest
-- [ ] M3a training environment (venv in ~/zbor-build, CPU/GPU check, MMS bul loads + speaks)
-- [ ] M3b data prep: espeak mk phonemes/text → MMS char set mapping; train/val split
-- [ ] M3c pilot fine-tune (≤30 min, capped scope): s/step, VRAM, samples at checkpoints
-- [ ] M3d price the full run (hours) → log
+- [x] M3a training environment (venv in ~/zbor-build, CPU/GPU check, MMS bul loads + speaks)
+- [x] M3b data prep: espeak mk phonemes/text → MMS char set mapping; train/val split
+- [x] M3c pilot fine-tune (≤30 min, capped scope): s/step, VRAM, samples at checkpoints
+- [x] M3d price the full run (hours) → log
 - [ ] M3e full fine-tune (memory-capped systemd scope, checkpoints, samples on the eval set)
 - [ ] M3f synthesize the eval set with the new voice; package rating sheet A/B (espeak vs neural)
 - [ ] M4a export VITS to ONNX, verify output = PyTorch on eval sentences
@@ -42,3 +42,11 @@ first unchecked item and keep going until all are checked or Allan says he woke 
   writes digits; the voice's alphabet has none).
 - 01:30 env: torch 2.14+cu130 on the RTX 4050 (6 GB) in ~/zbor-build/.venv (same Zbor venv),
   ylacombe/finetune-hf-vits (MIT) in ~/zbor-build/src, monotonic_align built.
+- 01:40 M3a–c: trainable checkpoint = MMS bul generator + discriminator from ylacombe/mms-tts-eng-train
+  (Meta's bul full checkpoint is 403). finetune-hf-vits needed 2 compat patches
+  (tools/voice/patch_finetune_hf_vits.sh). Pilot: 200 steps in 1 min 55 s (1.74 it/s, batch 8, fp16).
+  Intelligibility proxy (Whisper small, same model as the app; CER on the 41 eval sentences):
+  eSpeak 175 wpm 26.6 %, eSpeak 140 wpm 20.9 %, Bulgarian voice untrained 21.8 %, pilot-200 56.0 %
+  (early GAN instability, <5 epochs). Side finding: slower eSpeak is more intelligible.
+- 01:40 M3d price: staged run, 8 × 1000 steps ≈ 8 × (10 min train + 3 min score) ≈ 1 h 45 min GPU,
+  ~2.7 GB disk. Driver: tools/voice/train_stages.sh; table ~/zbor-build/runs/stages.tsv.

@@ -6,6 +6,7 @@ Drops clips whose text has digits (the voice's alphabet cannot spell them, so te
 audio would disagree). Text goes through mk_text.to_model_text.
 """
 import csv
+import json
 import random
 import re
 import sys
@@ -24,14 +25,13 @@ splits = {"test": rows[:held], "train": rows[held:]}
 for split, rs in splits.items():
     d = OUT / split
     d.mkdir(parents=True, exist_ok=True)
-    with open(d / "metadata.csv", "w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["file_name", "text", "speaker_id"])
+    # JSON lines: datasets 3.x rejected the equivalent metadata.csv ("file_name must be present").
+    with open(d / "metadata.jsonl", "w") as f:
         for r in rs:
             name = Path(r["file"]).name
             link = d / name
             if not link.exists():
                 link.symlink_to(SRC / r["file"])
-            w.writerow([name, to_model_text(r["text"]), 0])
+            f.write(json.dumps({"file_name": name, "text": to_model_text(r["text"])}, ensure_ascii=False) + "\n")
 hours = sum(float(r["seconds"]) for r in splits["train"]) / 3600
 print(f"{OUT}: train {len(splits['train'])} clips ({hours:.2f} h), test {len(splits['test'])}")
