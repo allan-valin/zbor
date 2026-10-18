@@ -17,13 +17,14 @@ from mk_text import to_model_text  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 model_dir, name = sys.argv[1], sys.argv[2]
+p_fix = "pfix" in name  # voices trained with the п→щ spelling must be fed the same way
 out = ROOT / "eval/audio" / name
 out.mkdir(parents=True, exist_ok=True)
 tok = AutoTokenizer.from_pretrained(model_dir)
 model = VitsModel.from_pretrained(model_dir).eval()
 torch.manual_seed(0)
 for r in csv.DictReader(open(ROOT / "eval/mk_eval_sentences.tsv"), delimiter="\t"):
-    ids = tok(to_model_text(r["mk"]), return_tensors="pt")
+    ids = tok(to_model_text(r["mk"], p_fix), return_tensors="pt")
     with torch.no_grad():
         wav = model(**ids).waveform[0].numpy()
     wav = wav / max(1e-6, np.abs(wav).max()) * 0.9

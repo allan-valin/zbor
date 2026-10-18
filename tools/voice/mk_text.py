@@ -15,9 +15,17 @@ MAP = {"ѓ": "гь", "ќ": "кь", "ј": "й", "љ": "ль", "њ": "нь", "џ":
 VOCAB = set(json.load(open(Path.home() / "zbor-build/voice-data/mms-tts-bul/vocab.json")))
 
 
-def to_model_text(text: str) -> str:
+# The HF MMS tokenizer treats its pad token "п" as special: it becomes id 0, the same as
+# the blanks between letters, so the voice cannot learn /p/. Variant: spell п as щ (a
+# Bulgarian letter Macedonian never uses), which has its own embedding.
+P_FIX = {"п": "щ"}
+
+
+def to_model_text(text: str, p_fix: bool = False) -> str:
     t = unicodedata.normalize("NFC", text.lower())
     t = "".join(MAP.get(c, c) for c in t)
+    if p_fix:
+        t = "".join(P_FIX.get(c, c) for c in t)
     t = "".join(c if c in VOCAB else " " for c in t)
     return re.sub(r"\s+", " ", t).strip()
 
