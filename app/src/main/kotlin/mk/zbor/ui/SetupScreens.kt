@@ -126,6 +126,8 @@ private fun KeepScreenOn() {
 fun SettingsDialog(
     outputSeam: Boolean,
     onOutputSeam: (Boolean) -> Unit,
+    neuralVoice: Boolean,
+    onNeuralVoice: (Boolean) -> Unit,
     speechRate: Int,
     onSpeechRate: (Int) -> Unit,
     onPreviewVoice: () -> Unit,
@@ -144,6 +146,13 @@ fun SettingsDialog(
                         Text(stringResource(R.string.review_translation_hint), style = MaterialTheme.typography.bodySmall)
                     }
                     Switch(checked = outputSeam, onCheckedChange = onOutputSeam, modifier = Modifier.testTag("output-seam"))
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.neural_voice))
+                        Text(stringResource(R.string.neural_voice_hint), style = MaterialTheme.typography.bodySmall)
+                    }
+                    Switch(checked = neuralVoice, onCheckedChange = onNeuralVoice, modifier = Modifier.testTag("neural-voice"))
                 }
                 Text(stringResource(R.string.speech_speed))
                 Row(verticalAlignment = Alignment.CenterVertically) {

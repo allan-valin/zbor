@@ -35,4 +35,6 @@
     <string name="speech_speed">Velocidade da voz</string>
     <string name="speech_speed_value">%1$d palavras por minuto — o normal é 175</string>
     <string name="play_example">Ouvir exemplo</string>
+    <string name="neural_voice">Voz macedônia natural</string>
+    <string name="neural_voice_hint">Desligado: a voz robótica do eSpeak. Os outros idiomas usam sempre o eSpeak.</string>
 </resources>

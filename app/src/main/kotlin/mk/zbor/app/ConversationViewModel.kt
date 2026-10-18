@@ -35,10 +35,15 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
     /** espeak-ng words per minute (settings slider). */
     val speechRate: StateFlow<Int> = _speechRate
 
+    private val _neuralVoice = MutableStateFlow(prefs.getBoolean(NEURAL_VOICE, true))
+    /** v2: natural (neural) Macedonian voice instead of eSpeak; on by default. */
+    val neuralVoice: StateFlow<Boolean> = _neuralVoice
+
     private val engines = ZborEngines.create(
         pack, ZborEngines.policyFor(app),
         onPolicyChange = { _slowMode.value = it },
         speechRate = { _speechRate.value },
+        neuralVoice = { _neuralVoice.value },
     )
 
     val controller = ConversationController(
@@ -50,6 +55,11 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
         faceToFace = prefs.getBoolean(FACE_TO_FACE, false),
         homeLang = homeLangFor(java.util.Locale.getDefault()),
     )
+
+    fun setNeuralVoice(on: Boolean) {
+        _neuralVoice.value = on
+        prefs.edit().putBoolean(NEURAL_VOICE, on).apply()
+    }
 
     fun setSpeechRate(wpm: Int) {
         _speechRate.value = wpm
@@ -83,6 +93,7 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
     private companion object {
         const val FACE_TO_FACE = "faceToFace"
         const val SPEECH_RATE = "speechRate"
+        const val NEURAL_VOICE = "neuralVoice"
         const val PREVIEW = "Здраво, како си? Каде е автобуската станица?"
     }
 

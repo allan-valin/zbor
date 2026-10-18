@@ -34,4 +34,6 @@
     <string name="speech_speed">Sprechgeschwindigkeit</string>
     <string name="speech_speed_value">%1$d Wörter pro Minute — normal sind 175</string>
     <string name="play_example">Beispiel anhören</string>
+    <string name="neural_voice">Natürliche mazedonische Stimme</string>
+    <string name="neural_voice_hint">Aus: die Roboterstimme von eSpeak. Andere Sprachen nutzen immer eSpeak.</string>
 </resources>

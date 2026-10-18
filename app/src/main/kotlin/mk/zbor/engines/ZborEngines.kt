@@ -15,6 +15,7 @@ import mk.zbor.core.SttEngine
 import mk.zbor.core.TtsEngine
 import mk.zbor.mt.NllbMtEngine
 import mk.zbor.mt.NllbTokenizer
+import mk.zbor.tts.VitsTtsEngine
 
 /** The three real engines, sharing one [ModelMgr]. */
 class ZborEngines(
@@ -37,6 +38,7 @@ class ZborEngines(
             policy: ResidencyPolicy,
             onPolicyChange: (ResidencyPolicy) -> Unit = {},
             speechRate: () -> Int = { EspeakTtsEngine.DEFAULT_RATE },
+            neuralVoice: () -> Boolean = { true },
         ): ZborEngines {
             val mgr = ModelMgr(policy, onPolicyChange)
             val stt = ModelSlot(ModelKind.STT) { WhisperSttEngine.open(pack.whisper) }
@@ -46,7 +48,13 @@ class ZborEngines(
                 val tokenizer = pack.nllbTokenizer.inputStream().use(NllbTokenizer::readCompact)
                 NllbMtEngine.open(pack.nllbEncoder, pack.nllbDecoder, tokenizer, opts)
             }
-            val tts = ModelSlot(ModelKind.TTS) { EspeakTtsEngine.open(pack.dir, speechRate) }
+            val tts = ModelSlot(ModelKind.TTS) {
+                val neural = if (pack.mkVoice.isFile) {
+                    val opts = OrtSession.SessionOptions().apply { setIntraOpNumThreads(4) }
+                    VitsTtsEngine.open(pack.mkVoice, pack.mkVoiceVocab, speechRate, opts)
+                } else null
+                RoutedTts(EspeakTtsEngine.open(pack.dir, speechRate), neural, neuralVoice)
+            }
             return ZborEngines(ManagedStt(mgr, stt), ManagedMt(mgr, mt), ManagedTts(mgr, tts), mgr, listOf(stt, mt))
         }
 

@@ -64,6 +64,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":mt"))
     implementation(project(":pack"))
+    implementation(project(":tts"))
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.22.0")
 
     implementation("androidx.core:core-ktx:1.16.0")

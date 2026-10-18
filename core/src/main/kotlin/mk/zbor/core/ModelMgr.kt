@@ -4,11 +4,11 @@ package mk.zbor.core
 enum class ModelKind { STT, MT, TTS }
 
 /**
- * Which models stay in RAM between turns. TTS is never kept: it runs once at the
- * end of a turn, while the reader is already looking at the translated text.
+ * Which models stay in RAM between turns. HOT (≥6 GB phones) keeps all three: since v2 the
+ * Macedonian voice is a 108 MB neural model, and reloading it every turn adds a second.
  */
 enum class ResidencyPolicy(val keeps: Set<ModelKind>) {
-    HOT(setOf(ModelKind.STT, ModelKind.MT)),
+    HOT(setOf(ModelKind.STT, ModelKind.MT, ModelKind.TTS)),
     WARM(setOf(ModelKind.STT)),
     COLD(emptySet());
 

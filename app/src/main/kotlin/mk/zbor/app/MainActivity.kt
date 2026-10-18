@@ -80,8 +80,10 @@ class MainActivity : ComponentActivity() {
                     ConversationScreen(ui, micAllowed, slow != null, actions)
                     if (settingsOpen) {
                         val rate by vm.speechRate.collectAsState()
+                        val neural by vm.neuralVoice.collectAsState()
                         SettingsDialog(
                             ui.outputSeam, vm.controller::setOutputSeam,
+                            neural, vm::setNeuralVoice,
                             rate, vm::setSpeechRate, vm::previewVoice,
                             pack.dir,
                         ) { settingsOpen = false }

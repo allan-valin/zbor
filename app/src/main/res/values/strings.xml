@@ -35,4 +35,6 @@
     <string name="speech_speed">Voice speed</string>
     <string name="speech_speed_value">%1$d words per minute — normal is 175</string>
     <string name="play_example">Play example</string>
+    <string name="neural_voice">Natural Macedonian voice</string>
+    <string name="neural_voice_hint">Off: the robotic eSpeak voice. Other languages always use eSpeak.</string>
 </resources>

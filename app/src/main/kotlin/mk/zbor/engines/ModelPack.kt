@@ -15,6 +15,9 @@ class ModelPack(val dir: File) {
     val nllbDecoder = File(dir, "nllb-decoder.ort")
     val nllbTokenizer = File(dir, "nllb-tokenizer.bin")
     val espeakData = File(dir, "espeak-ng-data")
+    /** v2: the fine-tuned Macedonian neural voice (VITS, ONNX) and its character vocabulary. */
+    val mkVoice = File(dir, "mk-voice.onnx")
+    val mkVoiceVocab = File(dir, "mk-voice.vocab.json")
 
     companion object {
         fun location(context: Context) = ModelPack(File(context.getExternalFilesDir(null), "models"))

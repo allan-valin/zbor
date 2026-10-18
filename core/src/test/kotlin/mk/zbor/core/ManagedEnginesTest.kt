@@ -32,9 +32,9 @@ class ManagedEnginesTest {
         assertEquals("heard", stt.transcribe(Utterance(shortArrayOf(0), 16_000), Lang.MK))
         assertEquals("PT:a", mt.translate("a", Lang.MK, Lang.PT))
         assertEquals("PT:b", mt.translate("b", Lang.MK, Lang.PT))
-        tts.synthesize("x", Lang.PT)
+        tts.synthesize("x", Lang.PT); tts.synthesize("y", Lang.PT)
         assertEquals(1, mts.size)                 // MT stayed resident (HOT)
-        assertTrue(ttss.single().closed)          // TTS evicted after use
+        assertTrue(!ttss.single().closed)         // so did TTS (HOT keeps the neural voice)
         assertTrue(mgr.isResident(ModelKind.STT))
     }
 }

@@ -39,12 +39,18 @@ class ResidencyPolicyTest {
 }
 
 class ModelMgrTest {
-    @Test fun `HOT keeps stt and mt resident across turns, evicts tts`() {
+    @Test fun `HOT keeps every model resident across turns (the neural voice too)`() {
         val s = Slots(); val m = ModelMgr(ResidencyPolicy.HOT)
         repeat(3) { m.use(s.stt) {}; m.use(s.mt) {}; m.use(s.tts) {} }
         assertEquals(1, s.loads[ModelKind.STT])
         assertEquals(1, s.loads[ModelKind.MT])
-        assertEquals(3, s.loads[ModelKind.TTS])
+        assertEquals(1, s.loads[ModelKind.TTS])
+    }
+
+    @Test fun `WARM reloads tts every turn`() {
+        val s = Slots(); val m = ModelMgr(ResidencyPolicy.WARM)
+        repeat(2) { m.use(s.tts) {} }
+        assertEquals(2, s.loads[ModelKind.TTS])
         assertFalse(m.isResident(ModelKind.TTS))
     }
 
