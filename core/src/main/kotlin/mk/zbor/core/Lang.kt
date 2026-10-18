@@ -8,4 +8,5 @@ data class Utterance(val pcm: ShortArray, val sampleRate: Int) {
     override fun equals(other: Any?) =
         other is Utterance && sampleRate == other.sampleRate && pcm.contentEquals(other.pcm)
     override fun hashCode() = 31 * pcm.contentHashCode() + sampleRate
+    override fun toString() = "Utterance(${pcm.size} samples @ $sampleRate Hz)"
 }

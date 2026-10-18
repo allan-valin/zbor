@@ -13,3 +13,9 @@ class LangTest {
         assertEquals(3, u.pcm.size)
     }
 }
+
+class UtteranceToStringTest {
+    @Test fun `toString summarises instead of dumping samples`() {
+        assertEquals("Utterance(3 samples @ 16000 Hz)", Utterance(shortArrayOf(1, 2, 3), 16_000).toString())
+    }
+}
