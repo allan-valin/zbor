@@ -13,7 +13,7 @@ first unchecked item and keep going until all are checked or Allan says he woke 
 - [x] M1c rating sheet for native speakers (HTML, offline, per-sentence 1–5 + comment, export) → eval/
 - [x] M2a check availability + licences: FLEURS mk, Common Voice mk, MMS-TTS bul
 - [x] M2b download FLEURS mk (~2.6 GB) into ~/zbor-build/voice-data (resumable, background)
-- [ ] M2c clip stats: speakers, durations, SNR estimate; pick clean subset; manifest
+- [x] M2c clip stats: speakers, durations, SNR estimate; pick clean subset; manifest
 - [ ] M3a training environment (venv in ~/zbor-build, CPU/GPU check, MMS bul loads + speaks)
 - [ ] M3b data prep: espeak mk phonemes/text → MMS char set mapping; train/val split
 - [ ] M3c pilot fine-tune (≤30 min, capped scope): s/step, VRAM, samples at checkpoints
@@ -33,3 +33,12 @@ first unchecked item and keep going until all are checked or Allan says he woke 
   140 wpm as blind voices А/Б, so testers' ratings also answer the speed question.
 - 01:10 M2a/b: FLEURS mk 2.0 GB (CC-BY-4.0) and MMS-TTS bul 139 MB (CC-BY-NC-4.0) downloaded to
   ~/zbor-build/voice-data. Common Voice mk skipped (Mozilla Data Collective sign-up).
+- 01:30 M2c: 3725 clips / 11.3 h, 11 voices found by ECAPA clustering (FLEURS has no speaker
+  ids). Chosen: voice #10, female, 1.62 h, SNR 53 dB (cleanest by far; others 29–45), 100 %
+  one gender. Clips with digits dropped (text/audio mismatch): train 361 clips / 1.18 h, test 20.
+  Runner-up if a male voice is wanted: #8 (1.12 h, SNR 44.7). Front-end: tools/voice/mk_text.py
+  (ѓ→гь ќ→кь ј→й љ→ль њ→нь џ→дж ѕ→дз), goldens eval/mk_text_goldens.tsv.
+  NOTE for M4: the app must spell numbers out in Macedonian before the neural voice (NLLB
+  writes digits; the voice's alphabet has none).
+- 01:30 env: torch 2.14+cu130 on the RTX 4050 (6 GB) in ~/zbor-build/.venv (same Zbor venv),
+  ylacombe/finetune-hf-vits (MIT) in ~/zbor-build/src, monotonic_align built.
