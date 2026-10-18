@@ -8,6 +8,7 @@ import mk.zbor.core.Lang
 import mk.zbor.core.MtEngine
 import mk.zbor.core.Stage
 import java.io.File
+import java.lang.ref.Reference
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
@@ -24,8 +25,13 @@ class NllbMtEngine(
     private val decoder: OrtSession,
     private val tokenizer: NllbTokenizer,
     private val maxTokens: Int = 200,
-    /** Mapped model files the sessions read weights from directly; must outlive them. */
-    @Suppress("unused") private val mapped: List<ByteBuffer> = emptyList(),
+    /**
+     * Mapped model files the sessions read weights from directly. They must stay
+     * reachable until [close]: once garbage-collected they are unmapped and ONNX
+     * Runtime segfaults mid-translation (it did, in the R8 release build, when this
+     * field was unused and got stripped).
+     */
+    private val mapped: List<ByteBuffer> = emptyList(),
 ) : MtEngine, AutoCloseable {
     private val env = OrtEnvironment.getEnvironment()
     private val pastNames = decoder.inputNames.filter { it.startsWith("past_key_values.") }
@@ -113,8 +119,13 @@ class NllbMtEngine(
     private fun emptyPast() =
         OnnxTensor.createTensor(env, FloatBuffer.allocate(0), longArrayOf(1, heads, 0, headDim))
 
+    /** How many model files this engine has memory-mapped (also keeps [mapped] referenced). */
+    val mappedFiles: Int get() = mapped.size
+
     override fun close() {
         encoder.close(); decoder.close()
+        // Only now may the mappings go: the sessions that read them are closed.
+        Reference.reachabilityFence(mapped)
     }
 
     companion object {

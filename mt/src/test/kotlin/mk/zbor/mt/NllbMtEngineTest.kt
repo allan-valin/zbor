@@ -43,4 +43,12 @@ class NllbMtEngineTest {
     @Test fun `blank input translates to blank without running the model`() {
         assertTrue(engine.translate("   ", Lang.PT, Lang.MK).isEmpty())
     }
+
+    @Test fun `mapped model files stay alive across garbage collection`() {
+        assertTrue(engine.mappedFiles == 2)
+        repeat(3) {
+            System.gc(); Thread.sleep(50)
+            assertContains(engine.translate("Where is the bus station?", Lang.EN, Lang.MK).lowercase(), "автобуск")
+        }
+    }
 }
