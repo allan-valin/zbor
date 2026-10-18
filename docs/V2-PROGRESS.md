@@ -20,8 +20,8 @@ first unchecked item and keep going until all are checked or Allan says he woke 
 - [x] M3d price the full run (hours) → log
 - [ ] M3e full fine-tune (memory-capped systemd scope, checkpoints, samples on the eval set)
 - [ ] M3f synthesize the eval set with the new voice; package rating sheet A/B (espeak vs neural)
-- [ ] M4a export VITS to ONNX, verify output = PyTorch on eval sentences
-- [ ] M4b `VitsTtsEngine` in the app (ORT, mk text front-end in Kotlin), JVM/instrumented tests
+- [x] M4a export VITS to ONNX, verify output = PyTorch on eval sentences
+- [x] M4b `VitsTtsEngine` in the app (ORT, mk text front-end in Kotlin), JVM/instrumented tests
 - [ ] M4c settings switch eSpeak ↔ neural, pack-v2 manifest/download, emulator pass
 - [ ] M4d release build, install on Allan's phone (no pack deletion), GitHub release (pack-v2 + v0.2.0)
 - [ ] M5 Piper/MMS voices for pt/en/de (only if M4 done)
@@ -50,3 +50,15 @@ first unchecked item and keep going until all are checked or Allan says he woke 
   (early GAN instability, <5 epochs). Side finding: slower eSpeak is more intelligible.
 - 01:40 M3d price: staged run, 8 × 1000 steps ≈ 8 × (10 min train + 3 min score) ≈ 1 h 45 min GPU,
   ~2.7 GB disk. Driver: tools/voice/train_stages.sh; table ~/zbor-build/runs/stages.tsv.
+- 01:50 M3e running: stage 1 (1000 steps) CER 40.6 % (pilot-200 56 %); 8 stages ≈ until 03:30.
+  Queued after it (systemd unit zbor-queue-pfix): the same 8 stages with п spelled щ, because
+  the HF MMS tokenizer turns its pad token "п" into id 0 = the blank, so /p/ cannot be learned.
+- 01:50 M4a: tools/voice/export_onnx.py — legacy tracer works (dynamo fails on VITS splines);
+  speaking_rate is a graph input (speed slider). Verified on a noise-free copy: envelope match
+  1.000, rate 0.8 → 1.25× length (±0.064 rounding). Gotcha: torch.onnx.export leaves the model
+  in train mode (dropout) — the first comparisons were wrong because of that.
+- 01:50 M4b: :tts module (MkNumbers, MkTextFrontEnd = Python goldens, VitsVocab reproduces the
+  HF п-quirk exactly on all 41 sentences, VitsTtsEngine), 9 JVM tests green on the pilot ONNX.
+  pack: per-file `release` (pack-v2 adds files, pack-v1 files stay where they are), 11 tests.
+  App: RoutedTts (mk → neural if present + switched on, else eSpeak), settings switch EN/PT/DE,
+  ResidencyPolicy.HOT now keeps TTS too (108 MB voice would reload every turn).
