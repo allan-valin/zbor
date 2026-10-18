@@ -12,4 +12,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "zbor"
-include(":core", ":mt", ":pack", ":app")
+include(":core", ":mt", ":pack", ":tts", ":app")
