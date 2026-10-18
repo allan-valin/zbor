@@ -15,7 +15,7 @@
 - **Edit seam is mandatory and inviolable:** `MtEngine` MUST NOT be invoked before the input text is confirmed; `TtsEngine` MUST synthesize the *confirmed* text (post-edit), never the raw STT output.
 - **TTS backend for SP1:** espeak-ng (robotic, offline) behind `TtsEngine`; the trained mk voice (SP2) swaps in behind the same interface. M1 uses a fake.
 - **Commit discipline:** commit at every step boundary that says Commit; small commits, not one big one (matches Allan's existing app discipline).
-- **Repo:** `/home/allan/projects/zbor` (already `git init`-ed; branch `main`).
+- **Repo:** `/home/allan/projects/zbor - macedonian conversation app ` (trailing space) (already `git init`-ed; branch `main`).
 
 ---
 

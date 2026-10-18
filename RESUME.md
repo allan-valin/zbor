@@ -1,13 +1,17 @@
 # Zbor — Resume Checkpoint
 
-_Last updated: 2026-07-19_
+_Last updated: 2026-10-18_
 
 ## What Zbor is
 Offline Android/Kotlin split-screen conversation translator, Macedonian ↔
 pt-br/en/de, for talking in person with a Macedonian-only speaker where there is
 no cell signal. **The whole point is Macedonian TTS** (Google deactivated theirs).
 
-## Status: design + planning done, no app code written yet
+## Status: SP1 · M1 DONE (2026-10-18)
+- `:core` module built: `./gradlew :core:test` → 13 tests green (6 commits).
+- Deviation from plan: `AwaitingOutputConfirm` carries `sttText` so `Done.sttText`
+  stays the speaker's words after an output-seam edit (plan set it to the translation).
+- Gradle wrapper 8.13, Kotlin 2.0.21, JDK 21.
 - **Spec (approved):** `docs/superpowers/specs/2026-07-19-offline-mk-conversation-translator-design.md`
 - **Plan (ready to execute):** `docs/superpowers/plans/2026-07-19-sp1-m1-pipeline-core.md`
 - **Spikes (done):** `spikes/` — see findings below.
@@ -30,11 +34,9 @@ no cell signal. **The whole point is Macedonian TTS** (Google deactivated theirs
 - SP1 milestones: **M1** pipeline+edit-seam core (planned, pure-Kotlin), M2 real engines+ModelMgr, M3 UI, M4 delivery.
 
 ## Next action when you return
-Execute **SP1 · M1** (`docs/superpowers/plans/2026-07-19-sp1-m1-pipeline-core.md`)
-via superpowers:subagent-driven-development (recommended) or executing-plans.
-6 tasks, TDD, pure-Kotlin `:core` module — no Android/emulator needed for M1.
-
-Then: plan M2 (the native-engine milestone; JNI/NNAPI unknowns live there).
+Write the **M2 plan** (real engines + ModelMgr, Android `:app` + native):
+whisper.cpp JNI, NLLB via ONNX Runtime, espeak-ng JNI. JNI/NNAPI unknowns live
+there — spike the riskiest engine first before planning the rest.
 
 ## Open items / asks for later
 - Confirm a GitHub repo name for Zbor (portfolio) before first push — repo is
