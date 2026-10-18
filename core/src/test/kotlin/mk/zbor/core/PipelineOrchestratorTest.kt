@@ -89,3 +89,22 @@ class PipelineConfirmTest {
         assertEquals(Stage.MT, s.stage)
     }
 }
+
+class PipelineIntegrationTest {
+    @Test fun `mk to pt full turn, no output seam`() {
+        val o = PipelineOrchestrator(FakeStt("здраво"), FakeMt(), FakeTts())
+        assertIs<TurnState.Recording>(o.startTurn(Lang.MK, Lang.PT))
+        assertIs<TurnState.AwaitingInputConfirm>(o.submitAudio(Utterance(shortArrayOf(1), 16_000)))
+        val done = o.confirmInput("здраво")
+        assertIs<TurnState.Done>(done)
+        assertEquals("PT:здраво", done.mtText)
+    }
+
+    @Test fun `pt to mk full turn, with output seam`() {
+        val o = PipelineOrchestrator(FakeStt("oi"), FakeMt(), FakeTts(), outputSeam = true)
+        o.startTurn(Lang.PT, Lang.MK)
+        o.submitAudio(Utterance(shortArrayOf(1), 16_000))
+        assertIs<TurnState.AwaitingOutputConfirm>(o.confirmInput("oi"))
+        assertIs<TurnState.Done>(o.confirmOutput("здраво"))
+    }
+}
