@@ -1,0 +1,42 @@
+id	category	mk	en
+01	greeting	Здраво, како си?	Hi, how are you?
+02	greeting	Добро утро.	Good morning.
+03	greeting	Добра вечер.	Good evening.
+04	courtesy	Благодарам многу.	Thank you very much.
+05	courtesy	Многу ми е драго што се запознавме.	Very nice to meet you.
+06	directions	Извинете, каде е тоалетот?	Excuse me, where is the toilet?
+07	directions	Каде е автобуската станица?	Where is the bus station?
+08	directions	Свртете лево на вториот семафор.	Turn left at the second traffic light.
+09	directions	Продолжете право околу двесте метри.	Go straight on for about two hundred metres.
+10	shopping	Колку чини ова?	How much does this cost?
+11	shopping	Тоа чини двесте и педесет денари.	That costs two hundred and fifty denars.
+12	shopping	Цената на билетот е триста денари.	The ticket costs three hundred denars.
+13	food	Сакам едно кафе и чаша вода.	I would like a coffee and a glass of water.
+14	food	Сметката, ве молам.	The bill, please.
+15	health	Алергичен сум на јаткасти плодови.	I am allergic to nuts.
+16	health	Ми треба лекар.	I need a doctor.
+17	health	Повикајте брза помош!	Call an ambulance!
+18	health	Каде е најблиската аптека?	Where is the nearest pharmacy?
+19	health	Детето има температура од вчера.	The child has had a fever since yesterday.
+20	time	Колку е часот?	What time is it?
+21	time	Возот тргнува во седум и петнаесет.	The train leaves at seven fifteen.
+22	time	Се гледаме утре во девет часот.	See you tomorrow at nine.
+23	time	Ќе дојдам со такси за половина час.	I will come by taxi in half an hour.
+24	numbers	Бројам: еден, два, три, четири, пет, шест, седум, осум, девет, десет.	Counting: one to ten.
+25	numbers	Мојот број е седумдесет и два, триесет и осум, петнаесет.	My number is seventy-two, thirty-eight, fifteen.
+26	language	Јас не зборувам македонски добро.	I don't speak Macedonian well.
+27	language	Можете ли да зборувате побавно?	Can you speak more slowly?
+28	language	Не разбирам. Ве молам, напишете го.	I don't understand. Please write it down.
+29	travel	Ова е мојот пасош.	This is my passport.
+30	travel	Од каде сте? Јас сум од Бразил.	Where are you from? I am from Brazil.
+31	travel	Дали има бесплатен интернет тука?	Is there free internet here?
+32	travel	Го изгубив клучот од собата.	I lost the key to the room.
+33	places	Битола, Струмица и Тетово се градови во Македонија.	Bitola, Strumica and Tetovo are cities in Macedonia.
+34	letters-ѓ	Ѓорѓи живее во Скопје.	Gjorgji lives in Skopje.
+35	letters-ќљ	Ќерката на Љубица оди во Охрид.	Ljubica's daughter is going to Ohrid.
+36	letters-њ	Њивата е зад куќата.	The field is behind the house.
+37	letters-џ	Џебот ми е празен.	My pocket is empty.
+38	letters-ѕ	Ѕвездите се гледаат ноќе.	The stars can be seen at night.
+39	letters-жшч	Жената чита книга на шпански.	The woman is reading a book in Spanish.
+40	weather	Временската прогноза вели дека утре ќе врне.	The forecast says it will rain tomorrow.
+41	long	Ако сакате, можеме да одиме заедно до пазарот, а потоа да ручаме кај мене.	If you like, we can walk to the market together and then have lunch at my place.
