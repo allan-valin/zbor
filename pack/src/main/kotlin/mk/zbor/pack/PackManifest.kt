@@ -6,9 +6,19 @@ import java.io.File
 import java.io.InputStream
 import java.security.MessageDigest
 
-/** One release asset. [unzip] assets are extracted into the pack dir and not kept. */
+/**
+ * One release asset. [unzip] assets are extracted into the pack dir and not kept.
+ * [release] names the GitHub release that holds it when that is not the one the
+ * download URL points at (pack-v2 adds the voice without re-uploading pack-v1's files).
+ */
 @Serializable
-data class PackFile(val name: String, val size: Long, val sha256: String, val unzip: Boolean = false)
+data class PackFile(
+    val name: String,
+    val size: Long,
+    val sha256: String,
+    val unzip: Boolean = false,
+    val release: String? = null,
+)
 
 /** What a complete pack is: shipped inside the APK, so sideloaded files are checked too. */
 @Serializable

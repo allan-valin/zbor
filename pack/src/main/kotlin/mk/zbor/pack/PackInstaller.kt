@@ -41,7 +41,7 @@ class PackInstaller(val dir: File, val manifest: PackManifest) {
         for (f in todo.missing + todo.bad) {
             val part = File(dir, "${f.name}.part")
             val base = done
-            fetch(URL(baseUrl.trimEnd('/') + "/" + f.name), part, f.size) { got -> progress(base + got, manifest.totalBytes) }
+            fetch(URL(urlOf(baseUrl, f)), part, f.size) { got -> progress(base + got, manifest.totalBytes) }
             if (part.length() < f.size) {
                 // The connection ended early but cleanly: keep the bytes, the next call resumes.
                 throw IOException("${f.name}: connection ended at ${part.length()} of ${f.size} bytes")
@@ -70,6 +70,13 @@ class PackInstaller(val dir: File, val manifest: PackManifest) {
             if (install(f, part)) { imported += f.name; done += f.size } else { part.delete(); rejected += f.name }
         }
         return ImportResult(imported, rejected, absent)
+    }
+
+    /** `…/download/pack-v1/` + name, or the sibling release folder when [PackFile.release] says so. */
+    private fun urlOf(baseUrl: String, f: PackFile): String {
+        val base = baseUrl.trimEnd('/')
+        val dir = f.release?.let { base.substringBeforeLast('/') + "/" + it } ?: base
+        return "$dir/${f.name}"
     }
 
     private enum class State { OK, MISSING, BAD }

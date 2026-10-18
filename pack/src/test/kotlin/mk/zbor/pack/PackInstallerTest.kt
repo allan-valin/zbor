@@ -134,4 +134,22 @@ class PackInstallerTest {
         assertEquals("здраво", File(device, "voice-data/mk_dict").readText())
         assertTrue(!File(device, "voice-data.zip").exists())
     }
+
+    @Test fun `files tagged with another release download from that release`() {
+        val m = makeRelease()
+        // Serve: <root>/pack-v1/<v1 files>, <root>/pack-v2/voice.onnx
+        val root = File(tmp, "srv")
+        File(root, "pack-v1").mkdirs(); File(root, "pack-v2").mkdirs()
+        release.listFiles()!!.forEach { it.copyTo(File(root, "pack-v1/${it.name}")) }
+        File(root, "pack-v2/voice.onnx").writeBytes(Random(3).nextBytes(20_000))
+        val voice = PackManifest.build("x", File(root, "pack-v2")).files.single().copy(release = "pack-v2")
+        val v2 = PackManifest("pack-v2", m.files + voice)
+        assertEquals(v2, PackManifest.parse(v2.toJson()))
+        TestServer(root).use { srv ->
+            val p = PackInstaller(device, v2)
+            p.download(srv.url + "pack-v1/") { _, _ -> }
+            assertTrue(p.status(deep = true).ready, p.status().toString())
+            assertTrue(File(device, "voice.onnx").isFile)
+        }
+    }
 }
