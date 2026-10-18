@@ -58,6 +58,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.intl.LocaleList
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -130,11 +132,12 @@ private fun MiddleBar(ui: ConversationUi, slowMode: Boolean, actions: Conversati
                     modifier = Modifier.testTag("face-to-face"),
                 )
                 if (!ui.faceToFace) {
-                    FilledTonalIconButton(
+                    FilledIconButton(
                         onClick = actions::swapLangs,
                         enabled = !ui.busy && ui.phase != Phase.RECORDING,
-                        modifier = Modifier.padding(start = 8.dp).testTag("swap"),
-                    ) { Icon(Icons.Default.SwapVert, contentDescription = "⇅") }
+                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primary),
+                        modifier = Modifier.padding(start = 12.dp).size(60.dp).testTag("swap"),
+                    ) { Icon(Icons.Default.SwapVert, contentDescription = "⇅", modifier = Modifier.size(36.dp)) }
                 }
                 Text(
                     if (slowMode) stringResource(R.string.slow_mode) else "",
@@ -209,6 +212,8 @@ private fun SideHalf(
                     onValueChange = { actions.edit(side, it) },
                     textStyle = MaterialTheme.typography.headlineSmall,
                     placeholder = { Text(words.typeHere) },
+                    // Ask the keyboard for this half's language (Gboard switches if that layout is installed).
+                    keyboardOptions = KeyboardOptions(hintLocales = LocaleList(me.lang.locale)),
                     modifier = Modifier.fillMaxSize().focusRequester(focus).testTag("edit-$side"),
                 )
                 LaunchedEffect(Unit) { if (me.text.isEmpty()) focus.requestFocus() }

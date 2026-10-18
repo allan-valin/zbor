@@ -25,6 +25,12 @@ val Lang.flag: String
         Lang.MK -> "🇲🇰"; Lang.PT -> "🇧🇷"; Lang.EN -> "🇬🇧"; Lang.DE -> "🇩🇪"
     }
 
+/** Keyboard hint locale for typing in this language. */
+val Lang.locale: String
+    get() = when (this) {
+        Lang.MK -> "mk-MK"; Lang.PT -> "pt-BR"; Lang.EN -> "en-US"; Lang.DE -> "de-DE"
+    }
+
 val Lang.nativeName: String
     get() = when (this) {
         Lang.MK -> "Македонски"; Lang.PT -> "Português"; Lang.EN -> "English"; Lang.DE -> "Deutsch"
