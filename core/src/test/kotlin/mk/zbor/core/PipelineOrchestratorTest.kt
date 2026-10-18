@@ -108,3 +108,30 @@ class PipelineIntegrationTest {
         assertIs<TurnState.Done>(o.confirmOutput("здраво"))
     }
 }
+
+class PipelineDegradedTest {
+    private val brokenTts = object : TtsEngine {
+        override fun synthesize(text: String, lang: Lang): Utterance = throw EngineException(Stage.TTS, "no voice")
+    }
+
+    @Test fun `tts failure keeps the translation so it can still be shown`() {
+        val o = PipelineOrchestrator(FakeStt("здраво"), FakeMt(), brokenTts)
+        o.startTurn(Lang.MK, Lang.PT)
+        o.submitAudio(Utterance(shortArrayOf(0), 16_000))
+        val s = o.confirmInput("здраво")
+        assertIs<TurnState.Failed>(s)
+        assertEquals(Stage.TTS, s.stage)
+        assertEquals("PT:здраво", s.mtText)
+    }
+
+    @Test fun `typed turn starts at the input seam without any audio`() {
+        val stt = FakeStt("unused"); val mt = FakeMt()
+        val o = PipelineOrchestrator(stt, mt, FakeTts())
+        val s = o.startTyped(Lang.PT, Lang.MK)
+        assertIs<TurnState.AwaitingInputConfirm>(s)
+        assertEquals("", s.sttText)
+        assertEquals(0, stt.calls)
+        assertIs<TurnState.Done>(o.confirmInput("obrigado"))
+        assertEquals("obrigado", mt.lastText)
+    }
+}

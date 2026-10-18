@@ -19,6 +19,12 @@ class PipelineOrchestrator(
         return state
     }
 
+    /** Keyboard entry: skip recording and STT, straight to the (empty) input seam. */
+    fun startTyped(from: Lang, to: Lang): TurnState {
+        state = TurnState.AwaitingInputConfirm("", from, to)
+        return state
+    }
+
     fun submitAudio(audio: Utterance): TurnState {
         val rec = state as? TurnState.Recording
             ?: error("submitAudio called in state $state; expected Recording")
@@ -34,15 +40,16 @@ class PipelineOrchestrator(
     fun confirmInput(editedText: String): TurnState {
         val seam = state as? TurnState.AwaitingInputConfirm
             ?: error("confirmInput called in state $state; expected AwaitingInputConfirm")
-        state = try {
-            val mtText = mt.translate(editedText, seam.from, seam.to)
-            if (outputSeam) {
-                TurnState.AwaitingOutputConfirm(editedText, mtText, seam.to)
-            } else {
-                TurnState.Done(editedText, mtText, tts.synthesize(mtText, seam.to))
-            }
+        val mtText = try {
+            mt.translate(editedText, seam.from, seam.to)
         } catch (e: EngineException) {
-            TurnState.Failed(e.stage, e.message ?: "${e.stage} failed")
+            state = TurnState.Failed(e.stage, e.message ?: "MT failed")
+            return state
+        }
+        state = if (outputSeam) {
+            TurnState.AwaitingOutputConfirm(editedText, mtText, seam.to)
+        } else {
+            speak(editedText, mtText, seam.to)
         }
         return state
     }
@@ -50,11 +57,13 @@ class PipelineOrchestrator(
     fun confirmOutput(editedText: String): TurnState {
         val seam = state as? TurnState.AwaitingOutputConfirm
             ?: error("confirmOutput called in state $state; expected AwaitingOutputConfirm")
-        state = try {
-            TurnState.Done(seam.sttText, editedText, tts.synthesize(editedText, seam.to))
-        } catch (e: EngineException) {
-            TurnState.Failed(e.stage, e.message ?: "TTS failed")
-        }
+        state = speak(seam.sttText, editedText, seam.to)
         return state
+    }
+
+    private fun speak(sttText: String, mtText: String, to: Lang): TurnState = try {
+        TurnState.Done(sttText, mtText, tts.synthesize(mtText, to))
+    } catch (e: EngineException) {
+        TurnState.Failed(e.stage, e.message ?: "TTS failed", mtText)
     }
 }

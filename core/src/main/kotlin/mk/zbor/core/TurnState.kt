@@ -7,5 +7,6 @@ sealed interface TurnState {
     data class AwaitingInputConfirm(val sttText: String, val from: Lang, val to: Lang) : TurnState
     data class AwaitingOutputConfirm(val sttText: String, val mtText: String, val to: Lang) : TurnState
     data class Done(val sttText: String, val mtText: String, val audio: Utterance) : TurnState
-    data class Failed(val stage: Stage, val reason: String) : TurnState
+    /** [mtText] survives a TTS failure so the translation can still be read. */
+    data class Failed(val stage: Stage, val reason: String, val mtText: String? = null) : TurnState
 }
