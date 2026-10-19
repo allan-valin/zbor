@@ -72,3 +72,6 @@ first unchecked item and keep going until all are checked or Allan says he woke 
   would have cost 45 GPU min for nothing). Phrase splitter: Whisper word times are contiguous, so
   pauses come from audio energy (≥200 ms, −35 dB) matched to word boundaries; ~1.5 phrases/clip.
   Queue (unit zbor-queue2): pshort = п-fix + short phrases, 4 stages; then pfix only, 3 stages.
+- 03:30 phrases: 361 long clips + 509 phrases (60 min). pshort failed at start (datasets ignores a
+  symlinked split dir) → fixed, re-queued after pfix (unit zbor-queue3). pfix stage 1: 38.2 %
+  (no-fix stage 1: 40.6 %).

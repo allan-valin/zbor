@@ -120,9 +120,12 @@ def main() -> None:
     with open(OUT / "train/metadata.jsonl", "w") as f:
         for m in meta:
             f.write(json.dumps(m, ensure_ascii=False) + "\n")
-    test = OUT / "test"
-    if not test.exists():
-        test.symlink_to(BASE / "test")
+    test = OUT / "test"  # a real folder: datasets ignores a symlinked split directory
+    test.mkdir(exist_ok=True)
+    (test / "metadata.jsonl").write_text((BASE / "test/metadata.jsonl").read_text())
+    for w in (BASE / "test").glob("*.wav"):
+        if not (test / w.name).exists():
+            (test / w.name).symlink_to(w.resolve())
     secs = sum(sf.info(OUT / "train" / m["file_name"]).duration for m in meta[-n_phr:]) if n_phr else 0
     print(f"{OUT}: {len(meta) - n_phr} long clips + {n_phr} phrases ({secs / 60:.0f} min)")
 
