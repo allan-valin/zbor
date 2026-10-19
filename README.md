@@ -13,13 +13,16 @@ How a turn works:
 3. The translation appears on the other half of the screen and is spoken aloud.
    🔊 replays it.
 
-The Macedonian voice is still robotic (it uses the eSpeak NG synthesiser). A
-natural-sounding Macedonian voice is the next part of the project, and **feedback
-from Macedonian speakers is exactly what this test is for.**
+Since version 0.2 the Macedonian voice is a **natural, human-sounding voice**: a
+Bulgarian neural voice (Meta MMS) reading Macedonian, so it has a Bulgarian accent.
+The robotic eSpeak NG voice is still there as a switch in ⚙. **Feedback from
+Macedonian speakers is exactly what this test is for** — see *What to test* below.
 
-> **Status: test version (0.1).** Android only, 64-bit ARM phones (practically every
-> phone from 2018 on). Needs about **1.2 GB of free space** and a **one-time
-> 1.1 GB download over Wi-Fi**; after that it works completely offline.
+> **Status: test version (0.2).** Android only, 64-bit ARM phones (practically every
+> phone from 2018 on). Needs about **1.4 GB of free space** and a **one-time
+> 1.2 GB download over Wi-Fi**; after that it works completely offline.
+> Updating from 0.1: install the new APK over the old one, open it and tap
+> **Download** once more — only the new voice (108 MB) is fetched.
 
 ---
 
@@ -40,8 +43,8 @@ from Macedonian speakers is exactly what this test is for.**
 
 | What | Link |
 |---|---|
-| The app (`zbor-0.1.0.apk`, ~50 MB) | https://github.com/allan-valin/zbor/releases/latest |
-| The offline model pack (5 files, 1.1 GB) | the app downloads it by itself on first start — nothing to do |
+| The app (`zbor-0.2.0.apk`, ~50 MB) | https://github.com/allan-valin/zbor/releases/latest |
+| The offline model pack (7 files, 1.2 GB) | the app downloads it by itself on first start — nothing to do |
 
 ### Step 1 — allow your phone to install the app
 
@@ -53,7 +56,7 @@ from your browser or file manager. This is normal for test apps.
 
 In words:
 
-1. Open the download link above **on the phone** and download `zbor-0.1.0.apk`.
+1. Open the download link above **on the phone** and download `zbor-0.2.0.apk`.
 2. Open the downloaded file (from the browser's download notification, or the
    **Files / Downloads** app).
 3. Android says the browser is not allowed to install unknown apps → tap
@@ -86,7 +89,7 @@ including Macedonian, gets English).
 | ok / missing / damaged | ok / fehlt / beschädigt | ok / falta / corrompido |
 
 1. Connect to **Wi-Fi**, tap **Download**.
-2. Keep the app open until it finishes (1.1 GB — a few minutes on fast Wi-Fi). The
+2. Keep the app open until it finishes (1.2 GB — a few minutes on fast Wi-Fi). The
    screen stays on by itself. If the connection drops, tap **Download** again: it
    **continues where it stopped**.
 3. When it is done, the conversation screen opens. From now on no internet is needed.
@@ -119,7 +122,7 @@ conversation across a table — each person uses their own half.
 | ✓ (turns green) | "The text is right — translate and speak it" |
 | 🔊 | Speak the last translation again |
 | ⇅ | Swap the languages (normal mode) |
-| ⚙ | Settings: **voice speed** (slider + 🔊 *play example*; normal is 175 words/min) and *review the translation before speaking* |
+| ⚙ | Settings: **natural Macedonian voice** on/off (off = robotic eSpeak), **voice speed** (slider + 🔊 *play example*; normal is 175 words/min) and *review the translation before speaking* |
 
 Each half shows its hints in its own language, so the Macedonian speaker only
 ever needs to read Macedonian.
@@ -135,11 +138,20 @@ space bar).
 
 ## What to test and how to report it
 
-We especially need people who speak Macedonian. Useful things to try:
+We especially need people who speak Macedonian.
+
+**Easiest: the rating sheet.** Download `zbor-rating-v2.html` from the
+[latest release](https://github.com/allan-valin/zbor/releases/latest) and open it in any
+browser (phone or computer, no internet needed after download). It plays 41 sentences
+in three anonymous voices; rate each from 1 to 5, then tap *Copy results* and send
+them back. About 20 minutes.
+
+In the app, useful things to try:
 
 1. **The Macedonian voice.** Type or say a few everyday sentences in Portuguese,
    English or German and let the app speak the Macedonian. *Can you understand
-   it? Which words sound wrong?*
+   it? Which words sound wrong?* Compare with the robotic voice (⚙ → natural
+   Macedonian voice off).
 2. **Recognition.** Speak Macedonian into the microphone. *How often does the
    written text match what you said? Which words does it get wrong?* (Correcting
    them before ✓ is part of the design.)
@@ -243,16 +255,17 @@ Linux / macOS:
 adb devices                       # the phone must be listed as "device", not "unauthorized"
 
 # the app
-curl -L -o zbor.apk https://github.com/allan-valin/zbor/releases/latest/download/zbor-0.1.0.apk
+curl -L -o zbor.apk https://github.com/allan-valin/zbor/releases/latest/download/zbor-0.2.0.apk
 adb install -r zbor.apk           # Xiaomi: tap "Install" on the phone now
 
-# the model pack (1.1 GB) into the phone's Download/zbor-pack folder
-BASE=https://github.com/allan-valin/zbor/releases/download/pack-v1
+# the model pack (1.2 GB) into the phone's Download/zbor-pack folder
+R=https://github.com/allan-valin/zbor/releases/download
 DEST=/sdcard/Download/zbor-pack
 adb shell mkdir -p $DEST
-for f in espeak-ng-data.zip ggml-small-q5_1.bin nllb-encoder.ort nllb-decoder.ort nllb-tokenizer.bin; do
-  curl -L -C - -o "$f" "$BASE/$f"
-  adb push "$f" "$DEST/"
+for f in pack-v1/espeak-ng-data.zip pack-v1/ggml-small-q5_1.bin pack-v1/nllb-encoder.ort \
+         pack-v1/nllb-decoder.ort pack-v1/nllb-tokenizer.bin pack-v2/mk-voice.onnx pack-v2/mk-voice.vocab.json; do
+  curl -L -C - -o "$(basename $f)" "$R/$f"
+  adb push "$(basename $f)" "$DEST/"
 done
 
 adb shell am start -n mk.zbor/.app.MainActivity
@@ -267,14 +280,15 @@ Windows (PowerShell, inside the platform-tools folder):
 
 ```powershell
 .\adb devices
-curl.exe -L -o zbor.apk https://github.com/allan-valin/zbor/releases/latest/download/zbor-0.1.0.apk
+curl.exe -L -o zbor.apk https://github.com/allan-valin/zbor/releases/latest/download/zbor-0.2.0.apk
 .\adb install -r zbor.apk
-$BASE = "https://github.com/allan-valin/zbor/releases/download/pack-v1"
+$R = "https://github.com/allan-valin/zbor/releases/download"
 $DEST = "/sdcard/Download/zbor-pack"
 .\adb shell mkdir -p $DEST
-foreach ($f in "espeak-ng-data.zip","ggml-small-q5_1.bin","nllb-encoder.ort","nllb-decoder.ort","nllb-tokenizer.bin") {
-  curl.exe -L -C - -o $f "$BASE/$f"
-  .\adb push $f "$DEST/"
+foreach ($f in "pack-v1/espeak-ng-data.zip","pack-v1/ggml-small-q5_1.bin","pack-v1/nllb-encoder.ort","pack-v1/nllb-decoder.ort","pack-v1/nllb-tokenizer.bin","pack-v2/mk-voice.onnx","pack-v2/mk-voice.vocab.json") {
+  $n = Split-Path $f -Leaf
+  curl.exe -L -C - -o $n "$R/$f"
+  .\adb push $n "$DEST/"
 }
 .\adb shell am start -n mk.zbor/.app.MainActivity
 # then on the phone: Import from a folder… → Download → zbor-pack → Use this folder → Allow
@@ -311,4 +325,7 @@ built and published, and how to run the tests. Design and plans live in
 - Translation: Meta's [NLLB-200 distilled 600M](https://huggingface.co/facebook/nllb-200-distilled-600M)
   (weights **CC-BY-NC-4.0** — non-commercial use only), run with
   [ONNX Runtime](https://onnxruntime.ai) (MIT).
-- Voice: [eSpeak NG](https://github.com/espeak-ng/espeak-ng) (GPL-3.0).
+- Voices: Meta's [MMS-TTS Bulgarian](https://huggingface.co/facebook/mms-tts-bul) (**CC-BY-NC-4.0**) reading
+  Macedonian, and [eSpeak NG](https://github.com/espeak-ng/espeak-ng) (GPL-3.0).
+- Voice research data: [FLEURS](https://huggingface.co/datasets/google/fleurs) Macedonian (CC-BY-4.0).
+  How the voice was chosen: [`docs/V2-PROGRESS.md`](docs/V2-PROGRESS.md).
