@@ -22,10 +22,10 @@ first unchecked item and keep going until all are checked or Allan says he woke 
 - [x] M3f synthesize the eval set with the new voice; package rating sheet A/B (espeak vs neural)
 - [x] M4a export VITS to ONNX, verify output = PyTorch on eval sentences
 - [x] M4b `VitsTtsEngine` in the app (ORT, mk text front-end in Kotlin), JVM/instrumented tests
-- [ ] M4c settings switch eSpeak ↔ neural, pack-v2 manifest/download, emulator pass
-- [ ] M4d release build, install on Allan's phone (no pack deletion), GitHub release (pack-v2 + v0.2.0)
-- [ ] M5 Piper/MMS voices for pt/en/de (only if M4 done)
-- [ ] END morning summary in Log
+- [x] M4c settings switch eSpeak ↔ neural, pack-v2 manifest/download, emulator pass
+- [x] M4d release build, install on Allan's phone (no pack deletion), GitHub release (pack-v2 + v0.2.0)
+- [x] M5 Piper/MMS voices for pt/en/de (only if M4 done)
+- [x] END morning summary in Log
 
 ## Log
 - 01:10 P0+M1 done. 41 sentences (eval/mk_eval_sentences.tsv; written by Claude, need a native
@@ -90,3 +90,25 @@ first unchecked item and keep going until all are checked or Allan says he woke 
   noise baked in) as the v2 "natural voice" — about as intelligible as slow eSpeak, but human.
   Recommendation for Allan: eSpeak default 175 → 140 wpm (−21 % errors); left unchanged.
   Rating sheet eval/rating-v2.html: blind eSpeak 175 / eSpeak 140 / neural.
+- 04:45 disk hit 100 % (another session's Wiktionary downloads in casus/). Freed my own: experiment
+  checkpoints (kept stage-2), FLEURS tarballs, uv cache prune → 7.7 GB free. Emulator had lost its
+  data on the failed start; pack re-pushed.
+- 04:50 M4c/d: emulator 11/11 (incl. download of pack-v1 + pack-v2 from scratch, neural voice 1.25 s
+  for 4.7 s audio on the emulator CPU); RELEASE build tested by hand on the emulator (en→mk turn,
+  spoken, no crash). Published pack-v2 (2 files) and v0.2.0 (APK + zbor-rating-v2.html), README
+  updated. Installed 0.2.0 on Allan's phone (pack kept; it needs one tap on Download, 108 MB).
+- 05:00 M5 deferred: English eSpeak 11.9 % vs MMS-eng 12.4 % CER — no intelligibility gain, +108 MB
+  per language and number words in 3 languages. If a natural pt-BR voice is wanted: Piper pt_BR.
+
+## Morning summary (for Allan)
+1. **0.2.0 is on your phone and on GitHub.** Open Zbor → tap **Download** once (108 MB, Wi-Fi) → the
+   Macedonian voice is now human-sounding. ⚙ has *Natural Macedonian voice* on/off and the speed.
+2. **The voice is Meta's Bulgarian voice reading Macedonian** (letters ѓ ќ ј љ њ џ ѕ spelled the
+   Bulgarian way), with steadier synthesis settings. Training it on Macedonian recordings did NOT
+   make it clearer: 7 runs, best 27.5 % errors vs 21.4 % for the untrained voice (Whisper as judge;
+   real human speech scores 6.9 %). Details and the table above.
+3. **Send friends** github.com/allan-valin/zbor — the release has the APK and a rating sheet
+   (zbor-rating-v2.html, ~20 min, blind: eSpeak 175 / eSpeak 140 / natural). Their ratings decide
+   the next step; the Macedonian sentences and number words still need a native check.
+4. **Your call:** eSpeak default 175 → 140 wpm cuts its errors by a fifth (26.6 → 20.9 %).
+5. Not done: M5 (pt/en/de natural voices) — measured, no clarity gain, deferred.
