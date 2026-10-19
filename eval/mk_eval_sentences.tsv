@@ -1,42 +1,42 @@
-id	category	mk	en	pt
-01	greeting	Здраво, како си?	Hi, how are you?	Oi, tudo bem?
-02	greeting	Добро утро.	Good morning.	Bom dia.
-03	greeting	Добра вечер.	Good evening.	Boa noite.
-04	courtesy	Благодарам многу.	Thank you very much.	Muito obrigado.
-05	courtesy	Многу ми е драго што се запознавме.	Very nice to meet you.	Muito prazer em te conhecer.
-06	directions	Извинете, каде е тоалетот?	Excuse me, where is the toilet?	Com licença, onde fica o banheiro?
-07	directions	Каде е автобуската станица?	Where is the bus station?	Onde fica a rodoviária?
-08	directions	Свртете лево на вториот семафор.	Turn left at the second traffic light.	Vire à esquerda no segundo semáforo.
-09	directions	Продолжете право околу двесте метри.	Go straight on for about two hundred metres.	Siga em frente por uns duzentos metros.
-10	shopping	Колку чини ова?	How much does this cost?	Quanto custa isto?
-11	shopping	Тоа чини двесте и педесет денари.	That costs two hundred and fifty denars.	Isso custa duzentos e cinquenta denares.
-12	shopping	Цената на билетот е триста денари.	The ticket costs three hundred denars.	A passagem custa trezentos denares.
-13	food	Сакам едно кафе и чаша вода.	I would like a coffee and a glass of water.	Eu queria um café e um copo d'água.
-14	food	Сметката, ве молам.	The bill, please.	A conta, por favor.
-15	health	Алергичен сум на јаткасти плодови.	I am allergic to nuts.	Sou alérgico a nozes.
-16	health	Ми треба лекар.	I need a doctor.	Preciso de um médico.
-17	health	Повикајте брза помош!	Call an ambulance!	Chame uma ambulância!
-18	health	Каде е најблиската аптека?	Where is the nearest pharmacy?	Onde fica a farmácia mais próxima?
-19	health	Детето има температура од вчера.	The child has had a fever since yesterday.	A criança está com febre desde ontem.
-20	time	Колку е часот?	What time is it?	Que horas são?
-21	time	Возот тргнува во седум и петнаесет.	The train leaves at seven fifteen.	O trem sai às sete e quinze.
-22	time	Се гледаме утре во девет часот.	See you tomorrow at nine.	Até amanhã às nove.
-23	time	Ќе дојдам со такси за половина час.	I will come by taxi in half an hour.	Eu chego de táxi em meia hora.
-24	numbers	Бројам: еден, два, три, четири, пет, шест, седум, осум, девет, десет.	Counting: one to ten.	Contando: um, dois, três, quatro, cinco, seis, sete, oito, nove, dez.
-25	numbers	Мојот број е седумдесет и два, триесет и осум, петнаесет.	My number is seventy-two, thirty-eight, fifteen.	Meu número é setenta e dois, trinta e oito, quinze.
-26	language	Јас не зборувам македонски добро.	I don't speak Macedonian well.	Eu não falo bem macedônio.
-27	language	Можете ли да зборувате побавно?	Can you speak more slowly?	Você pode falar mais devagar?
-28	language	Не разбирам. Ве молам, напишете го.	I don't understand. Please write it down.	Não entendo. Por favor, escreva.
-29	travel	Ова е мојот пасош.	This is my passport.	Este é o meu passaporte.
-30	travel	Од каде сте? Јас сум од Бразил.	Where are you from? I am from Brazil.	De onde você é? Eu sou do Brasil.
-31	travel	Дали има бесплатен интернет тука?	Is there free internet here?	Tem internet grátis aqui?
-32	travel	Го изгубив клучот од собата.	I lost the key to the room.	Perdi a chave do quarto.
-33	places	Битола, Струмица и Тетово се градови во Македонија.	Bitola, Strumica and Tetovo are cities in Macedonia.	Bitola, Strumica e Tetovo são cidades da Macedônia.
-34	letters-ѓ	Ѓорѓи живее во Скопје.	Gjorgji lives in Skopje.	O Gjorgji mora em Skopje.
-35	letters-ќљ	Ќерката на Љубица оди во Охрид.	Ljubica's daughter is going to Ohrid.	A filha da Ljubica vai para Ohrid.
-36	letters-њ	Њивата е зад куќата.	The field is behind the house.	O campo fica atrás da casa.
-37	letters-џ	Џебот ми е празен.	My pocket is empty.	Meu bolso está vazio.
-38	letters-ѕ	Ѕвездите се гледаат ноќе.	The stars can be seen at night.	As estrelas aparecem à noite.
-39	letters-жшч	Жената чита книга на шпански.	The woman is reading a book in Spanish.	A mulher está lendo um livro em espanhol.
-40	weather	Временската прогноза вели дека утре ќе врне.	The forecast says it will rain tomorrow.	A previsão diz que amanhã vai chover.
-41	long	Ако сакате, можеме да одиме заедно до пазарот, а потоа да ручаме кај мене.	If you like, we can walk to the market together and then have lunch at my place.	Se você quiser, podemos ir juntos até o mercado e depois almoçar na minha casa.
+id	category	mk	en	pt	de
+01	greeting	Здраво, како си?	Hi, how are you?	Oi, tudo bem?	Hallo, wie geht's?
+02	greeting	Добро утро.	Good morning.	Bom dia.	Guten Morgen.
+03	greeting	Добра вечер.	Good evening.	Boa noite.	Guten Abend.
+04	courtesy	Благодарам многу.	Thank you very much.	Muito obrigado.	Vielen Dank.
+05	courtesy	Многу ми е драго што се запознавме.	Very nice to meet you.	Muito prazer em te conhecer.	Freut mich sehr, Sie kennenzulernen.
+06	directions	Извинете, каде е тоалетот?	Excuse me, where is the toilet?	Com licença, onde fica o banheiro?	Entschuldigung, wo ist die Toilette?
+07	directions	Каде е автобуската станица?	Where is the bus station?	Onde fica a rodoviária?	Wo ist der Busbahnhof?
+08	directions	Свртете лево на вториот семафор.	Turn left at the second traffic light.	Vire à esquerda no segundo semáforo.	Biegen Sie an der zweiten Ampel links ab.
+09	directions	Продолжете право околу двесте метри.	Go straight on for about two hundred metres.	Siga em frente por uns duzentos metros.	Gehen Sie etwa zweihundert Meter geradeaus.
+10	shopping	Колку чини ова?	How much does this cost?	Quanto custa isto?	Wie viel kostet das?
+11	shopping	Тоа чини двесте и педесет денари.	That costs two hundred and fifty denars.	Isso custa duzentos e cinquenta denares.	Das kostet zweihundertfünfzig Denar.
+12	shopping	Цената на билетот е триста денари.	The ticket costs three hundred denars.	A passagem custa trezentos denares.	Die Fahrkarte kostet dreihundert Denar.
+13	food	Сакам едно кафе и чаша вода.	I would like a coffee and a glass of water.	Eu queria um café e um copo d'água.	Ich hätte gern einen Kaffee und ein Glas Wasser.
+14	food	Сметката, ве молам.	The bill, please.	A conta, por favor.	Die Rechnung, bitte.
+15	health	Алергичен сум на јаткасти плодови.	I am allergic to nuts.	Sou alérgico a nozes.	Ich bin allergisch gegen Nüsse.
+16	health	Ми треба лекар.	I need a doctor.	Preciso de um médico.	Ich brauche einen Arzt.
+17	health	Повикајте брза помош!	Call an ambulance!	Chame uma ambulância!	Rufen Sie einen Krankenwagen!
+18	health	Каде е најблиската аптека?	Where is the nearest pharmacy?	Onde fica a farmácia mais próxima?	Wo ist die nächste Apotheke?
+19	health	Детето има температура од вчера.	The child has had a fever since yesterday.	A criança está com febre desde ontem.	Das Kind hat seit gestern Fieber.
+20	time	Колку е часот?	What time is it?	Que horas são?	Wie spät ist es?
+21	time	Возот тргнува во седум и петнаесет.	The train leaves at seven fifteen.	O trem sai às sete e quinze.	Der Zug fährt um sieben Uhr fünfzehn ab.
+22	time	Се гледаме утре во девет часот.	See you tomorrow at nine.	Até amanhã às nove.	Bis morgen um neun.
+23	time	Ќе дојдам со такси за половина час.	I will come by taxi in half an hour.	Eu chego de táxi em meia hora.	Ich komme in einer halben Stunde mit dem Taxi.
+24	numbers	Бројам: еден, два, три, четири, пет, шест, седум, осум, девет, десет.	Counting: one to ten.	Contando: um, dois, três, quatro, cinco, seis, sete, oito, nove, dez.	Ich zähle: eins, zwei, drei, vier, fünf, sechs, sieben, acht, neun, zehn.
+25	numbers	Мојот број е седумдесет и два, триесет и осум, петнаесет.	My number is seventy-two, thirty-eight, fifteen.	Meu número é setenta e dois, trinta e oito, quinze.	Meine Nummer ist zweiundsiebzig, achtunddreißig, fünfzehn.
+26	language	Јас не зборувам македонски добро.	I don't speak Macedonian well.	Eu não falo bem macedônio.	Ich spreche nicht gut Mazedonisch.
+27	language	Можете ли да зборувате побавно?	Can you speak more slowly?	Você pode falar mais devagar?	Können Sie langsamer sprechen?
+28	language	Не разбирам. Ве молам, напишете го.	I don't understand. Please write it down.	Não entendo. Por favor, escreva.	Ich verstehe nicht. Bitte schreiben Sie es auf.
+29	travel	Ова е мојот пасош.	This is my passport.	Este é o meu passaporte.	Das ist mein Reisepass.
+30	travel	Од каде сте? Јас сум од Бразил.	Where are you from? I am from Brazil.	De onde você é? Eu sou do Brasil.	Woher kommen Sie? Ich komme aus Brasilien.
+31	travel	Дали има бесплатен интернет тука?	Is there free internet here?	Tem internet grátis aqui?	Gibt es hier kostenloses Internet?
+32	travel	Го изгубив клучот од собата.	I lost the key to the room.	Perdi a chave do quarto.	Ich habe den Zimmerschlüssel verloren.
+33	places	Битола, Струмица и Тетово се градови во Македонија.	Bitola, Strumica and Tetovo are cities in Macedonia.	Bitola, Strumica e Tetovo são cidades da Macedônia.	Bitola, Strumica und Tetovo sind Städte in Mazedonien.
+34	letters-ѓ	Ѓорѓи живее во Скопје.	Gjorgji lives in Skopje.	O Gjorgji mora em Skopje.	Gjorgji wohnt in Skopje.
+35	letters-ќљ	Ќерката на Љубица оди во Охрид.	Ljubica's daughter is going to Ohrid.	A filha da Ljubica vai para Ohrid.	Ljubicas Tochter fährt nach Ohrid.
+36	letters-њ	Њивата е зад куќата.	The field is behind the house.	O campo fica atrás da casa.	Das Feld liegt hinter dem Haus.
+37	letters-џ	Џебот ми е празен.	My pocket is empty.	Meu bolso está vazio.	Meine Tasche ist leer.
+38	letters-ѕ	Ѕвездите се гледаат ноќе.	The stars can be seen at night.	As estrelas aparecem à noite.	Nachts sieht man die Sterne.
+39	letters-жшч	Жената чита книга на шпански.	The woman is reading a book in Spanish.	A mulher está lendo um livro em espanhol.	Die Frau liest ein Buch auf Spanisch.
+40	weather	Временската прогноза вели дека утре ќе врне.	The forecast says it will rain tomorrow.	A previsão diz que amanhã vai chover.	Die Wettervorhersage sagt, dass es morgen regnet.
+41	long	Ако сакате, можеме да одиме заедно до пазарот, а потоа да ручаме кај мене.	If you like, we can walk to the market together and then have lunch at my place.	Se você quiser, podemos ir juntos até o mercado e depois almoçar na minha casa.	Wenn Sie möchten, können wir zusammen zum Markt gehen und dann bei mir zu Mittag essen.

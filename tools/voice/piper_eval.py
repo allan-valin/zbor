@@ -1,9 +1,9 @@
-"""Compare pt-BR voices by Whisper CER on the eval set's pt column (lower = clearer).
+"""Compare voices by Whisper CER on one language column of the eval set (lower = clearer).
 
 eSpeak NG makes the IPA phonemes Piper reads (it also spells numbers out), exactly what
 the app does through its espeak JNI. Needs onnxruntime (~/zbor-build/.venv).
 
-    ~/zbor-build/.venv/bin/python tools/voice/piper_eval.py ~/zbor-build/piper/pt_BR-*.onnx
+    ~/zbor-build/.venv/bin/python tools/voice/piper_eval.py [--lang pt|en|de] ~/zbor-build/piper/pt_BR-*.onnx
     ~/zbor-build/.venv/bin/python tools/voice/piper_eval.py --goldens <voice.onnx>   # → eval/pt_piper_goldens.tsv
 """
 import csv
@@ -53,21 +53,26 @@ def edits(a: str, b: str) -> int:
     return prev[-1]
 
 
-def score(make) -> float:
+LANGS = {"pt": "pt-br", "en": "en-us", "de": "de"}  # eval column → eSpeak voice (baseline)
+
+
+def score(make, lang: str = "pt") -> float:
     e = n = 0
     for r in csv.DictReader(open(ROOT / "eval/mk_eval_sentences.tsv"), delimiter="\t"):
         with tempfile.TemporaryDirectory() as t:
-            make(r["pt"], f"{t}/a.wav")
+            make(r[lang], f"{t}/a.wav")
             subprocess.run(["ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-i", f"{t}/a.wav", "-ar", "16000", "-ac", "1", f"{t}/b.wav"], check=True)
-            hyp = subprocess.run([CLI, "-m", MODEL, "-l", "pt", "-nt", "-np", "-t", "8", "-f", f"{t}/b.wav"], capture_output=True, text=True).stdout
-        ref = norm(r["pt"])
+            hyp = subprocess.run([CLI, "-m", MODEL, "-l", lang, "-nt", "-np", "-t", "8", "-f", f"{t}/b.wav"], capture_output=True, text=True).stdout
+        ref = norm(r[lang])
         e += edits(ref, norm(hyp))
         n += len(ref)
     return 100 * e / n
 
 
-def espeak(text, out):
-    subprocess.run([ESPEAK, "-v", "pt-br", "-w", out, text], env=ENV, check=True)
+def espeak_for(lang: str):
+    def espeak(text, out):
+        subprocess.run([ESPEAK, "-v", LANGS[lang], "-w", out, text], env=ENV, check=True)
+    return espeak
 
 
 def goldens(path: str) -> None:
@@ -83,8 +88,12 @@ def main() -> None:
     if sys.argv[1] == "--goldens":
         goldens(sys.argv[2])
         return
-    print(f"eSpeak pt-br: {score(espeak):.1f}%")
-    for path in sys.argv[1:]:
+    lang = "pt"
+    args = sys.argv[1:]
+    if args[0] == "--lang":
+        lang, args = args[1], args[2:]
+    print(f"eSpeak {LANGS[lang]}: {score(espeak_for(lang), lang):.1f}%")
+    for path in args:
         cfg = json.load(open(path + ".json"))
         sess = ort.InferenceSession(path, providers=["CPUExecutionProvider"])
         inf = cfg["inference"]
@@ -95,7 +104,7 @@ def main() -> None:
             wav = sess.run(None, {"input": ids, "input_lengths": np.array([ids.shape[1]], np.int64),
                                   "scales": np.array([inf["noise_scale"], inf["length_scale"], inf["noise_w"]], np.float32)})[0].squeeze()
             sf.write(out, wav / max(1e-6, np.abs(wav).max()) * 0.9, cfg["audio"]["sample_rate"])
-        print(f"{Path(path).stem}: {score(piper):.1f}%")
+        print(f"{Path(path).stem}: {score(piper, lang):.1f}%")
 
 
 if __name__ == "__main__":

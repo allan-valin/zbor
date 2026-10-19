@@ -177,4 +177,31 @@ class PackInstallerTest {
         p.import({ name -> File(release, name).takeIf { it.isFile }?.inputStream() }) { _, _ -> }
         assertTrue(p.isInstalled("voice-pt.onnx"))
     }
+
+    @Test fun `remove deletes a voice and its marker, removeAll wipes the pack`() {
+        val m = makeRelease()
+        File(release, "voice-pt.onnx").writeBytes(Random(7).nextBytes(10_000))
+        val opt = PackManifest.build("x", release).files.first { it.name == "voice-pt.onnx" }.copy(optional = true)
+        val p = PackInstaller(device, PackManifest("v", m.files + opt))
+        TestServer(release).use { srv ->
+            p.download(srv.url) { _, _ -> }
+            p.download(srv.url, only = setOf("voice-pt.onnx")) { _, _ -> }
+        }
+        assertTrue(p.installedBytes(setOf("voice-pt.onnx")) == 10_000L)
+        p.remove(setOf("voice-pt.onnx"))
+        assertTrue(!p.isInstalled("voice-pt.onnx") && !File(device, "voice-pt.onnx").exists())
+        assertTrue(p.status().ready)                       // base pack untouched
+        p.removeAll()
+        assertTrue(!device.exists() || device.listFiles()!!.isEmpty())
+        assertEquals(3, p.status().missing.size)
+    }
+
+    @Test fun `removing an unzipped file deletes what it unpacked`() {
+        val m = makeRelease()
+        TestServer(release).use { srv -> PackInstaller(device, m).download(srv.url) { _, _ -> } }
+        val p = PackInstaller(device, m)
+        p.remove(setOf("voice-data.zip"))
+        assertTrue(!File(device, "voice-data").exists())
+        assertEquals(listOf("voice-data.zip"), p.status().missing.map { it.name })
+    }
 }

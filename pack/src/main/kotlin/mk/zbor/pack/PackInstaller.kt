@@ -34,6 +34,29 @@ class PackInstaller(val dir: File, val manifest: PackManifest) {
         return PackStatus(ok, missing, bad)
     }
 
+    /** Bytes on disk of [names] that are installed (unzipped files count their archive size). */
+    fun installedBytes(names: Set<String>): Long =
+        manifest.files.filter { it.name in names && isInstalled(it.name) }.sumOf { it.size }
+
+    /**
+     * Deletes [names] (and their markers and `.part` leftovers). An unzipped file's unpacked
+     * folder goes too: the archive's top-level entries are read back from the manifest name
+     * (`foo.zip` → `foo/`), which is how build_pack.sh packs them.
+     */
+    fun remove(names: Set<String>) {
+        for (f in manifest.files.filter { it.name in names }) {
+            File(dir, f.name).delete()
+            File(dir, "${f.name}.part").delete()
+            File(markers, f.name).delete()
+            if (f.unzip) File(dir, f.name.removeSuffix(".zip")).deleteRecursively()
+        }
+    }
+
+    /** Deletes the whole pack directory; the app then asks to download again. */
+    fun removeAll() {
+        dir.deleteRecursively()
+    }
+
     fun isInstalled(name: String): Boolean =
         manifest.files.firstOrNull { it.name == name }?.let { check(it, deep = false) == State.OK } == true
 
