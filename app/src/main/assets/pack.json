@@ -2,6 +2,34 @@
     "version": "pack-v2",
     "files": [
         {
+            "name": "de-voice.onnx",
+            "size": 63201294,
+            "sha256": "7e64762d8e5118bb578f2eea6207e1a35a8e0c30595010b666f983fc87bb7819",
+            "release": "voice-de_DE-thorsten",
+            "optional": true
+        },
+        {
+            "name": "de-voice.onnx.json",
+            "size": 4819,
+            "sha256": "974adee790533adb273a1ac88f49027d2a1b8f0f2cf4905954a4791e79264e85",
+            "release": "voice-de_DE-thorsten",
+            "optional": true
+        },
+        {
+            "name": "en-voice.onnx",
+            "size": 63201294,
+            "sha256": "5efe09e69902187827af646e1a6e9d269dee769f9877d17b16b1b46eeaaf019f",
+            "release": "voice-en_US-lessac",
+            "optional": true
+        },
+        {
+            "name": "en-voice.onnx.json",
+            "size": 4885,
+            "sha256": "efe19c417bed055f2d69908248c6ba650fa135bc868b0e6abb3da181dab690a0",
+            "release": "voice-en_US-lessac",
+            "optional": true
+        },
+        {
             "name": "espeak-ng-data.zip",
             "size": 9210017,
             "sha256": "81e770a211083f9b1d3a1207e6e184bfa510a94df6fce07b9728361116616a3e",

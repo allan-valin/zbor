@@ -29,8 +29,9 @@ class ConversationUiTest {
         assumeTrue(ModelPack.installer(ctx).status().ready)
     }
 
-    private fun text(tag: String) = rule.onNodeWithTag(tag).fetchSemanticsNode()
-        .config.getOrNull(SemanticsProperties.Text)?.joinToString { it.text }.orEmpty()
+    /** "" while the node is absent (e.g. the top half is compact while the keyboard closes). */
+    private fun text(tag: String) = rule.onAllNodesWithTag(tag).fetchSemanticsNodes().firstOrNull()
+        ?.config?.getOrNull(SemanticsProperties.Text)?.joinToString { it.text }.orEmpty()
 
     @Test fun typedTurnShowsMacedonianOnTheTopHalf() {
         rule.onNodeWithTag("confirm-BOTTOM").assertIsNotEnabled()
