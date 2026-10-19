@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
                             ui.outputSeam, vm.controller::setOutputSeam,
                             voices, natural, vm.voiceBytes, vm::setNatural, vm::downloadVoice, vm::deleteVoice, vm::previewVoice,
                             rate, vm::setSpeechRate,
-                            stored, { vm.deleteAll { settingsOpen = false; setup.check() } },
+                            stored,
                             pack.dir,
                         ) { settingsOpen = false }
                     }

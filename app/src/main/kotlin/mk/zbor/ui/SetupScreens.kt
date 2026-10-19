@@ -147,11 +147,10 @@ fun SettingsDialog(
     speechRate: Int,
     onSpeechRate: (Int) -> Unit,
     downloadedBytes: Long,
-    onDeleteAll: () -> Unit,
     packDir: File,
     onDismiss: () -> Unit,
 ) {
-    var confirmDeleteAll by remember { mutableStateOf(false) }
+    var manage by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
@@ -186,31 +185,45 @@ fun SettingsDialog(
 
                 Text(stringResource(R.string.downloads_title), style = MaterialTheme.typography.titleMedium)
                 Text(stringResource(R.string.downloads_total, mb(downloadedBytes)), style = MaterialTheme.typography.bodySmall)
-                OutlinedButton(onClick = { confirmDeleteAll = true }, enabled = downloadedBytes > 0,
-                    modifier = Modifier.testTag("delete-all")) {
-                    Icon(Icons.Default.Delete, null, modifier = Modifier.padding(end = 8.dp))
-                    Text(stringResource(R.string.delete_all))
+                OutlinedButton(onClick = { manage = true }, modifier = Modifier.testTag("manage-voices")) {
+                    Text(stringResource(R.string.manage_voices))
                 }
                 Text(stringResource(R.string.models_at, packDir.path), style = MaterialTheme.typography.bodySmall)
             }
         },
     )
-    if (confirmDeleteAll) {
-        AlertDialog(
-            onDismissRequest = { confirmDeleteAll = false },
-            title = { Text(stringResource(R.string.delete_all_title)) },
-            text = { Text(stringResource(R.string.delete_all_text, mb(downloadedBytes))) },
-            confirmButton = {
-                TextButton(onClick = { confirmDeleteAll = false; onDeleteAll() }, modifier = Modifier.testTag("delete-all-confirm")) {
-                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = { TextButton(onClick = { confirmDeleteAll = false }) { Text(stringResource(R.string.cancel)) } },
-        )
-    }
+    if (manage) ManageVoicesDialog(voices, voiceBytes, onDelete) { manage = false }
 }
 
-/** One language: preview ▶, then Download (size) or on/off + delete. */
+/** Downloaded natural voices, each deletable on its own (the base models are never offered). */
+@Composable
+private fun ManageVoicesDialog(voices: Map<Lang, VoiceState>, voiceBytes: Map<Lang, Long>, onDelete: (Lang) -> Unit, onDismiss: () -> Unit) {
+    val installed = Lang.entries.filter { voices[it]?.installed == true }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.manage_voices_title)) },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (installed.isEmpty()) Text(stringResource(R.string.no_voices))
+                for (lang in installed) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("${lang.flag} ${lang.nativeName}")
+                            Text("${Voices.of(lang).credit} · ${mb(voiceBytes[lang] ?: 0)}", style = MaterialTheme.typography.bodySmall)
+                        }
+                        OutlinedButton(onClick = { onDelete(lang) }, modifier = Modifier.testTag("delete-$lang")) {
+                            Icon(Icons.Default.Delete, null, modifier = Modifier.padding(end = 6.dp))
+                            Text(stringResource(R.string.delete))
+                        }
+                    }
+                }
+            }
+        },
+    )
+}
+
+/** One language: preview ▶, then Download (size) or on/off. Deleting is in Manage voices. */
 @Composable
 private fun VoiceRow(
     lang: Lang, v: VoiceState, on: Boolean, bytes: Long,
@@ -235,9 +248,6 @@ private fun VoiceRow(
         }
         if (v.installed) {
             Switch(checked = on, onCheckedChange = { onNatural(lang, it) }, modifier = Modifier.testTag("natural-$lang"))
-            IconButton(onClick = { onDelete(lang) }, modifier = Modifier.testTag("delete-$lang")) {
-                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
-            }
         } else {
             OutlinedButton(onClick = { onDownload(lang) }, enabled = !v.busy, modifier = Modifier.testTag("download-$lang")) {
                 Text(mb(bytes))

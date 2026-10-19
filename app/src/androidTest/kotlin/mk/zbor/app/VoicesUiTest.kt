@@ -17,7 +17,7 @@ import org.junit.runner.RunWith
 import java.io.File
 import kotlin.test.assertTrue
 
-/** Settings → natural voices: download one, it becomes a switch; delete it, Download is back. */
+/** Settings → natural voices: download one, it becomes a switch; delete it in Manage voices, Download is back. */
 @RunWith(AndroidJUnit4::class)
 class VoicesUiTest {
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
@@ -36,7 +36,8 @@ class VoicesUiTest {
         rule.onNodeWithTag("download-PT").performScrollTo().performClick()
         rule.waitUntil(120_000) { exists("natural-PT") }
         assertTrue(File(ModelPack.location(ctx).dir, "pt-br-voice.onnx").isFile)
-        rule.onNodeWithTag("delete-PT").performScrollTo().performClick()
+        rule.onNodeWithTag("manage-voices").performScrollTo().performClick()
+        rule.onNodeWithTag("delete-PT").performClick()
         rule.waitUntil(30_000) { exists("download-PT") }
         assertTrue(!File(ModelPack.location(ctx).dir, "pt-br-voice.onnx").exists())
     }

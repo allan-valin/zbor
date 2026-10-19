@@ -40,12 +40,12 @@
     <string name="robot_voice_now">Robotic voice now · download a natural one</string>
     <string name="downloads_title">Downloads</string>
     <string name="downloads_total">Models on this phone: %1$s</string>
-    <string name="delete_all">Delete all downloads…</string>
-    <string name="delete_all_title">Delete all downloads?</string>
-    <string name="delete_all_text">This frees %1$s. Zbor can’t translate until it downloads its base models again (it will offer to).</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="history">History</string>
     <string name="clear_history">Clear</string>
     <string name="history_empty">No translations yet.</string>
+    <string name="manage_voices">Manage voices…</string>
+    <string name="manage_voices_title">Downloaded voices</string>
+    <string name="no_voices">No natural voices downloaded.</string>
 </resources>

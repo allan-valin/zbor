@@ -40,12 +40,12 @@
     <string name="robot_voice_now">Voz robótica agora · baixe uma natural</string>
     <string name="downloads_title">Downloads</string>
     <string name="downloads_total">Modelos neste celular: %1$s</string>
-    <string name="delete_all">Apagar todos os downloads…</string>
-    <string name="delete_all_title">Apagar todos os downloads?</string>
-    <string name="delete_all_text">Isso libera %1$s. O Zbor não traduz até baixar os modelos básicos de novo (ele vai oferecer).</string>
     <string name="delete">Apagar</string>
     <string name="cancel">Cancelar</string>
     <string name="history">Histórico</string>
     <string name="clear_history">Limpar</string>
     <string name="history_empty">Nenhuma tradução ainda.</string>
+    <string name="manage_voices">Gerenciar vozes…</string>
+    <string name="manage_voices_title">Vozes baixadas</string>
+    <string name="no_voices">Nenhuma voz natural baixada.</string>
 </resources>

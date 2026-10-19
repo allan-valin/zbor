@@ -129,17 +129,6 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Deletes every downloaded model; [then] runs on the main thread (the setup screen takes over). */
-    fun deleteAll(then: () -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            withContext(work) { engines.models.close() }
-            installer.removeAll()
-            _voices.value = Voices.all.associate { it.lang to VoiceState() }
-            refreshDownloaded()
-            withContext(Dispatchers.Main) { then() }
-        }
-    }
-
     fun refreshDownloaded() {
         viewModelScope.launch(Dispatchers.IO) {
             _downloadedBytes.value = pack.dir.walkTopDown().filter { it.isFile }.sumOf { it.length() }
