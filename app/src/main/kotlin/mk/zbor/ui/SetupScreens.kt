@@ -61,7 +61,9 @@ fun SetupScreen(state: SetupState, totalBytes: Long, packDir: File, actions: Set
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text(stringResource(R.string.setup_title), style = MaterialTheme.typography.headlineMedium)
-        Text(stringResource(R.string.setup_intro, mb(totalBytes)))
+        // What is still missing, not the whole pack: an update that only adds a voice says 108 MB.
+        val needed = (state as? SetupState.Needed)?.status?.let { st -> (st.missing + st.bad).sumOf { it.size } } ?: totalBytes
+        Text(stringResource(R.string.setup_intro, mb(needed)))
         when (state) {
             is SetupState.Working -> {
                 if (state.done > 0) KeepScreenOn()
