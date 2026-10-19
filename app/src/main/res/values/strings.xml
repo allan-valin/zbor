@@ -48,4 +48,6 @@
     <string name="manage_voices">Manage voices…</string>
     <string name="manage_voices_title">Downloaded voices</string>
     <string name="no_voices">No natural voices downloaded.</string>
+    <string name="menus_follow_bottom">Menus in the bottom language</string>
+    <string name="menus_follow_bottom_hint">For handing the phone over: menus follow the language of the bottom half instead of the phone’s.</string>
 </resources>

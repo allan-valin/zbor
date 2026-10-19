@@ -20,6 +20,8 @@ import mk.zbor.ui.ConversationActions
 import mk.zbor.ui.ConversationScreen
 import mk.zbor.ui.SetupActions
 import mk.zbor.ui.SetupScreen
+import mk.zbor.ui.Localized
+import androidx.compose.runtime.LaunchedEffect
 import mk.zbor.ui.HistoryDialog
 import mk.zbor.ui.SettingsDialog
 import mk.zbor.ui.ZborTheme
@@ -29,6 +31,9 @@ class MainActivity : ComponentActivity() {
     private var pendingMic: Side? = null
     private var settingsOpen by mutableStateOf(false)
     private var historyOpen by mutableStateOf(false)
+    private val prefs by lazy { getSharedPreferences("zbor", 0) }
+    /** Setting: menus follow the bottom half's language (for handing the phone over). */
+    private var menusFollowBottom by mutableStateOf(false)
 
     private val askMic = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         micAllowed = granted
@@ -73,9 +78,15 @@ class MainActivity : ComponentActivity() {
             override fun verify() = setup.check(deep = true)
         }
 
+        menusFollowBottom = prefs.getBoolean(MENUS_FOLLOW_BOTTOM, false)
         setContent {
+            val setupState by setup.state.collectAsState()
+            // The bottom language lives in the conversation; the setup screen uses the last one seen.
+            val bottom = if (setupState == SetupState.Ready) vm.controller.state.collectAsState().value.bottom.lang
+                else prefs.getString(LAST_BOTTOM, null)?.let { runCatching { Lang.valueOf(it) }.getOrNull() }
+            LaunchedEffect(bottom) { bottom?.let { prefs.edit().putString(LAST_BOTTOM, it.name).apply() } }
+            Localized(if (menusFollowBottom) bottom else null) {
             ZborTheme {
-                val setupState by setup.state.collectAsState()
                 if (setupState != SetupState.Ready) {
                     SetupScreen(setupState, setup.totalBytes, pack.dir, setupActions)
                 } else {
@@ -95,12 +106,19 @@ class MainActivity : ComponentActivity() {
                             voices, natural, vm.voiceBytes, vm::setNatural, vm::downloadVoice, vm::deleteVoice, vm::previewVoice,
                             rate, vm::setSpeechRate,
                             stored,
+                            menusFollowBottom, { on -> menusFollowBottom = on; prefs.edit().putBoolean(MENUS_FOLLOW_BOTTOM, on).apply() },
                             pack.dir,
                         ) { settingsOpen = false }
                     }
                 }
             }
+            }
         }
+    }
+
+    private companion object {
+        const val MENUS_FOLLOW_BOTTOM = "menusFollowBottom"
+        const val LAST_BOTTOM = "lastBottomLang"
     }
 
     private fun hasMic() =

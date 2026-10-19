@@ -47,4 +47,6 @@
     <string name="manage_voices">Stimmen verwalten…</string>
     <string name="manage_voices_title">Heruntergeladene Stimmen</string>
     <string name="no_voices">Keine natürlichen Stimmen heruntergeladen.</string>
+    <string name="menus_follow_bottom">Menüs in der unteren Sprache</string>
+    <string name="menus_follow_bottom_hint">Zum Weitergeben des Handys: Menüs folgen der Sprache der unteren Hälfte statt der des Handys.</string>
 </resources>

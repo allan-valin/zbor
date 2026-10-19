@@ -147,6 +147,8 @@ fun SettingsDialog(
     speechRate: Int,
     onSpeechRate: (Int) -> Unit,
     downloadedBytes: Long,
+    menusFollowBottom: Boolean,
+    onMenusFollowBottom: (Boolean) -> Unit,
     packDir: File,
     onDismiss: () -> Unit,
 ) {
@@ -163,6 +165,14 @@ fun SettingsDialog(
                         Text(stringResource(R.string.review_translation_hint), style = MaterialTheme.typography.bodySmall)
                     }
                     Switch(checked = outputSeam, onCheckedChange = onOutputSeam, modifier = Modifier.testTag("output-seam"))
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.menus_follow_bottom))
+                        Text(stringResource(R.string.menus_follow_bottom_hint), style = MaterialTheme.typography.bodySmall)
+                    }
+                    Switch(checked = menusFollowBottom, onCheckedChange = onMenusFollowBottom, modifier = Modifier.testTag("menus-follow-bottom"))
                 }
 
                 Text(stringResource(R.string.natural_voices), style = MaterialTheme.typography.titleMedium)

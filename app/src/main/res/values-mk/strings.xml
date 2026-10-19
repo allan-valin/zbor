@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Македонски. Written by Claude (2026-10-19): needs a native speaker's check. -->
+<resources>
+    <string name="setup_title">Поставување на Zbor</string>
+    <string name="setup_intro">Zbor преведува без интернет, но прво мора еднаш да ги преземе моделите за говор и превод (%1$s). Користете Wi-Fi. Ако врската се прекине, преземањето продолжува од каде што застанало.</string>
+    <string name="file_ok">во ред</string>
+    <string name="file_missing">недостасува</string>
+    <string name="file_bad">оштетено, ќе се преземе повторно</string>
+    <string name="download">Преземи</string>
+    <string name="download_metered">Преземи сепак (мобилен интернет)</string>
+    <string name="pause">Пауза</string>
+    <string name="import_folder">Увези од папка…</string>
+    <string name="verify_again">Провери ги датотеките повторно</string>
+    <string name="offline_hint">Нема Wi-Fi? Копирајте ги датотеките од пакетот во која било папка на телефонот (на пример Download/zbor-pack, преку USB-кабел или SD-картичка) и користете „Увези од папка…“.</string>
+    <string name="mb_of_mb">%1$s од %2$s</string>
+    <string name="ready">Подготвено.</string>
+    <string name="checking">Ги проверувам датотеките…</string>
+    <string name="checking_deep">Ја проверувам секоја датотека (може да трае една минута)…</string>
+    <string name="downloading">Преземам…</string>
+    <string name="importing">Увезувам…</string>
+    <string name="metered_warning">Користите мобилен интернет. Пакетот има %1$s; подобро е Wi-Fi.</string>
+    <string name="download_paused">Преземањето е паузирано. Притиснете „Преземи“ за да продолжи од каде што застанало.</string>
+    <string name="download_interrupted">Преземањето е прекинато (%1$s). Притиснете „Преземи“ за да продолжи од каде што застанало.</string>
+    <string name="import_result">Увезени: %1$d.</string>
+    <string name="import_rejected"> Различни од очекуваното (оштетени?): %1$s.</string>
+    <string name="import_absent"> Ги нема во папката: %1$s.</string>
+    <string name="import_failed">Увезувањето не успеа: %1$s</string>
+    <string name="face_to_face">Лице в лице</string>
+    <string name="slow_mode">Бавен режим (малку меморија)</string>
+    <string name="settings">Поставки</string>
+    <string name="close">Затвори</string>
+    <string name="review_translation">Провери го преводот пред да се изговори</string>
+    <string name="review_translation_hint">Преводот се прикажува за уредување на другата половина; се изговара дури по ✓.</string>
+    <string name="models_at">Модели: %1$s</string>
+    <string name="speech_speed">Брзина на гласот</string>
+    <string name="speech_speed_value">%1$d зборови во минута — нормално е 175</string>
+    <string name="play_example">Пушти пример</string>
+    <string name="natural_voices">Природни гласови</string>
+    <string name="natural_voices_hint">Опционални преземања. Без нив, или ако се исклучени, јазикот го користи роботскиот глас на eSpeak. ▶ пушта пример.</string>
+    <string name="robot_voice_now">Сега роботски глас · преземете природен</string>
+    <string name="downloads_title">Преземања</string>
+    <string name="downloads_total">Модели на овој телефон: %1$s</string>
+    <string name="delete">Избриши</string>
+    <string name="cancel">Откажи</string>
+    <string name="history">Историја</string>
+    <string name="clear_history">Исчисти</string>
+    <string name="history_empty">Сè уште нема преводи.</string>
+    <string name="manage_voices">Управувај со гласовите…</string>
+    <string name="manage_voices_title">Преземени гласови</string>
+    <string name="no_voices">Нема преземени природни гласови.</string>
+    <string name="menus_follow_bottom">Менија на долниот јазик</string>
+    <string name="menus_follow_bottom_hint">Кога го давате телефонот: менијата го следат јазикот на долната половина наместо јазикот на телефонот.</string>
+</resources>

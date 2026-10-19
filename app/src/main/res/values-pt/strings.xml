@@ -48,4 +48,6 @@
     <string name="manage_voices">Gerenciar vozes…</string>
     <string name="manage_voices_title">Vozes baixadas</string>
     <string name="no_voices">Nenhuma voz natural baixada.</string>
+    <string name="menus_follow_bottom">Menus no idioma de baixo</string>
+    <string name="menus_follow_bottom_hint">Para entregar o celular: os menus seguem o idioma da metade de baixo, não o do celular.</string>
 </resources>
