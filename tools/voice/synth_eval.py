@@ -25,6 +25,8 @@ model = VitsModel.from_pretrained(model_dir).eval()
 import os
 if "NOISE" in os.environ:  # VitsModel copies these from the config at load time
     model.noise_scale = float(os.environ["NOISE"])
+if "RATE" in os.environ:
+    model.speaking_rate = float(os.environ["RATE"])
 if "NOISE_W" in os.environ:
     model.noise_scale_duration = float(os.environ["NOISE_W"])
 torch.manual_seed(0)

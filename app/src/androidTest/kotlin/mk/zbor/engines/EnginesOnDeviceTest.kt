@@ -81,4 +81,15 @@ class EnginesOnDeviceTest {
             assertTrue(!e.models.isResident(ModelKind.MT)) // COLD evicted it
         }
     }
+
+    @Test fun neuralVoiceSpeaksMacedonian() {
+        assumeTrue(pack.mkVoice.isFile)
+        mk.zbor.tts.VitsTtsEngine.open(pack.mkVoice, pack.mkVoiceVocab).use { tts ->
+            val t0 = System.nanoTime()
+            val u = tts.synthesize("Каде е најблиската аптека? Чини 250 денари.", Lang.MK)
+            log("neural mk ${(System.nanoTime() - t0) / 1_000_000} ms: ${u.pcm.size} samples @ ${u.sampleRate}")
+            assertTrue(u.pcm.size > u.sampleRate * 1.5, "too short: ${u.pcm.size}")
+            assertTrue(u.pcm.maxOf { abs(it.toInt()) } > 10_000, "silent")
+        }
+    }
 }

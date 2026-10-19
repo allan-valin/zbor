@@ -1,31 +1,48 @@
 {
-    "version": "pack-v1",
+    "version": "pack-v2",
     "files": [
         {
             "name": "espeak-ng-data.zip",
             "size": 9210017,
             "sha256": "81e770a211083f9b1d3a1207e6e184bfa510a94df6fce07b9728361116616a3e",
-            "unzip": true
+            "unzip": true,
+            "release": "pack-v1"
         },
         {
             "name": "ggml-small-q5_1.bin",
             "size": 190085487,
-            "sha256": "ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb"
+            "sha256": "ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb",
+            "release": "pack-v1"
+        },
+        {
+            "name": "mk-voice.onnx",
+            "size": 114209818,
+            "sha256": "2649872e95de1456bcc4060ea337a18a33774d97603a6ad19f510e38e4727c70",
+            "release": "pack-v2"
+        },
+        {
+            "name": "mk-voice.vocab.json",
+            "size": 435,
+            "sha256": "c15eb6307fda0787ded408c1ed0547549e45ea35aec226ed4d27aabac0562202",
+            "release": "pack-v2"
         },
         {
             "name": "nllb-decoder.ort",
             "size": 475726352,
-            "sha256": "b7ced77a6bcbfda6c5676f84f017a69e51ccaee0fd8ddc3c61b30ca7a884f0e8"
+            "sha256": "b7ced77a6bcbfda6c5676f84f017a69e51ccaee0fd8ddc3c61b30ca7a884f0e8",
+            "release": "pack-v1"
         },
         {
             "name": "nllb-encoder.ort",
             "size": 419270176,
-            "sha256": "1620516265e6a09f5b84ca7a65e0ff833c376598503a3d0600685f0ebb921b7f"
+            "sha256": "1620516265e6a09f5b84ca7a65e0ff833c376598503a3d0600685f0ebb921b7f",
+            "release": "pack-v1"
         },
         {
             "name": "nllb-tokenizer.bin",
             "size": 6938060,
-            "sha256": "330d80552f82749bc2d4d394ffb3ec8838b9a4302bbccbd2b9d79d96d04938fd"
+            "sha256": "330d80552f82749bc2d4d394ffb3ec8838b9a4302bbccbd2b9d79d96d04938fd",
+            "release": "pack-v1"
         }
     ]
 }
