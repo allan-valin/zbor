@@ -11,8 +11,12 @@ class RoutedTts(
     private val useNatural: (Lang) -> Boolean,
 ) : TtsEngine, AutoCloseable {
     override fun synthesize(text: String, lang: Lang): Utterance {
-        val voice = natural[lang]?.takeIf { useNatural(lang) } ?: espeak
-        return voice.synthesize(text, lang)
+        val nat = natural[lang]?.takeIf { useNatural(lang) }
+        val t0 = System.nanoTime()
+        val u = (nat ?: espeak).synthesize(text, lang)
+        // One line per utterance: which voice spoke (class names are minified in release builds).
+        android.util.Log.i("ZborTts", "$lang ${if (nat != null) "natural" else "espeak"} ${u.pcm.size} samples @ ${u.sampleRate} Hz in ${(System.nanoTime() - t0) / 1_000_000} ms")
+        return u
     }
 
     override fun close() {
