@@ -18,13 +18,15 @@
             "name": "mk-voice.onnx",
             "size": 114209818,
             "sha256": "2649872e95de1456bcc4060ea337a18a33774d97603a6ad19f510e38e4727c70",
-            "release": "pack-v2"
+            "release": "pack-v2",
+            "optional": true
         },
         {
             "name": "mk-voice.vocab.json",
             "size": 435,
             "sha256": "c15eb6307fda0787ded408c1ed0547549e45ea35aec226ed4d27aabac0562202",
-            "release": "pack-v2"
+            "release": "pack-v2",
+            "optional": true
         },
         {
             "name": "nllb-decoder.ort",

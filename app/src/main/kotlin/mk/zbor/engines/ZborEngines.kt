@@ -54,8 +54,14 @@ class ZborEngines(
                 val espeak = EspeakTtsEngine.open(pack.dir, speechRate) // also initialises the phonemizer
                 val natural = HashMap<Lang, mk.zbor.core.TtsEngine>()
                 val opts = { OrtSession.SessionOptions().apply { setIntraOpNumThreads(4) } }
-                if (pack.mkVoice.isFile) natural[Lang.MK] = VitsTtsEngine.open(pack.mkVoice, pack.mkVoiceVocab, speechRate, opts())
-                if (pack.ptVoice.isFile) natural[Lang.PT] = PiperTtsEngine.open(Lang.PT, pack.ptVoice, ::phonemes, speechRate, opts())
+                for (v in Voices.all) {
+                    val model = java.io.File(pack.dir, v.model)
+                    if (!v.files.all { java.io.File(pack.dir, it).isFile }) continue
+                    natural[v.lang] = when (v.kind) {
+                        VoiceKind.MMS -> VitsTtsEngine.open(model, java.io.File(pack.dir, v.model.removeSuffix(".onnx") + ".vocab.json"), speechRate, opts())
+                        VoiceKind.PIPER -> PiperTtsEngine.open(v.lang, model, ::phonemes, speechRate, opts())
+                    }
+                }
                 RoutedTts(espeak, natural, naturalVoice)
             }
             return ZborEngines(ManagedStt(mgr, stt), ManagedMt(mgr, mt), ManagedTts(mgr, tts), mgr, listOf(stt, mt))

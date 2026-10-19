@@ -27,6 +27,9 @@ data class SideUi(val lang: Lang, val text: String = "")
 
 data class UiError(val stage: Stage, val message: String)
 
+/** One finished turn, kept in the conversation history (and saved across app restarts). */
+data class HistoryEntry(val from: Lang, val to: Lang, val source: String, val translation: String, val time: Long)
+
 data class ConversationUi(
     val top: SideUi = SideUi(Lang.MK),
     val bottom: SideUi = SideUi(Lang.PT),
@@ -41,6 +44,8 @@ data class ConversationUi(
     val outputSeam: Boolean = false,
     /** Face-to-face voice mode: the top half is mirrored for the person opposite. Off = both halves upright. */
     val faceToFace: Boolean = false,
+    /** Every finished turn, oldest first. */
+    val history: List<HistoryEntry> = emptyList(),
 ) {
     fun side(s: Side) = if (s == Side.TOP) top else bottom
     fun canReplay(s: Side) = replaySide == s && phase != Phase.SPEAKING
@@ -75,10 +80,17 @@ class ConversationController(
     faceToFace: Boolean = false,
     /** The phone owner's language, shown on the bottom half; Macedonian sits on top. */
     homeLang: Lang = Lang.PT,
+    history: List<HistoryEntry> = emptyList(),
+    /** Called with each new history entry (the app appends it to a file). */
+    private val onHistory: (HistoryEntry) -> Unit = {},
+    private val clock: () -> Long = System::currentTimeMillis,
 ) {
     private val _state = MutableStateFlow(
-        ConversationUi(bottom = SideUi(homeLang), outputSeam = outputSeam, faceToFace = faceToFace),
+        ConversationUi(bottom = SideUi(homeLang), outputSeam = outputSeam, faceToFace = faceToFace, history = history),
     )
+
+    /** What the screen showed before the current turn started, for [cancel]. */
+    private var beforeTurn: ConversationUi? = null
     val state: StateFlow<ConversationUi> = _state
 
     private var orchestrator = orchestratorFor(outputSeam)
@@ -99,6 +111,7 @@ class ConversationController(
         if (s.phase == Phase.EDITING && s.speaker == side) return
         if (s.phase == Phase.REVIEWING && s.speaker == side.other) return // listener is correcting
         orchestrator.startTyped(langOf(side), langOf(side.other))
+        beforeTurn = _state.value
         _state.update {
             it.copy(phase = Phase.EDITING, speaker = side, error = null).withSide(side) { t -> t.copy(text = "") }
         }
@@ -125,6 +138,26 @@ class ConversationController(
                 runStep(Stage.TTS) { orchestrator.confirmOutput(text.trim()) }
             }
         }
+    }
+
+    /** Leaves editing (or a failed turn) and puts back what the screen showed before it. */
+    fun cancel() {
+        val s = _state.value
+        if (s.phase != Phase.EDITING && s.phase != Phase.REVIEWING && s.phase != Phase.FAILED) return
+        val before = beforeTurn ?: return
+        _state.update { before.copy(phase = Phase.IDLE, speaker = null, error = null, history = it.history,
+            outputSeam = it.outputSeam, faceToFace = it.faceToFace) }
+    }
+
+    fun clearHistory() {
+        _state.update { it.copy(history = emptyList()) }
+    }
+
+    private fun remember(speaker: Side, translation: String) {
+        val s = _state.value
+        val entry = HistoryEntry(s.side(speaker).lang, s.side(speaker.other).lang, s.side(speaker).text, translation, clock())
+        _state.update { it.copy(history = it.history + entry) }
+        onHistory(entry)
     }
 
     fun replay(side: Side) {
@@ -162,6 +195,7 @@ class ConversationController(
     private fun startRecording(side: Side) {
         player.stop()
         orchestrator.startTurn(langOf(side), langOf(side.other))
+        beforeTurn = _state.value
         _state.update {
             it.copy(phase = Phase.RECORDING, speaker = side, level = 0f, error = null)
                 .withSide(side) { t -> t.copy(text = "") }
@@ -205,11 +239,15 @@ class ConversationController(
                 _state.update {
                     it.copy(replaySide = listener).withSide(listener) { t -> t.copy(text = result.mtText) }
                 }
+                remember(speaker, result.mtText)
                 speakOut(result.audio)
             }
-            is TurnState.Failed -> _state.update { s ->
-                val shown = result.mtText?.let { mt -> s.withSide(listener) { t -> t.copy(text = mt) } } ?: s
-                shown.copy(phase = Phase.FAILED, error = UiError(result.stage, result.reason))
+            is TurnState.Failed -> {
+                _state.update { s ->
+                    val shown = result.mtText?.let { mt -> s.withSide(listener) { t -> t.copy(text = mt) } } ?: s
+                    shown.copy(phase = Phase.FAILED, error = UiError(result.stage, result.reason))
+                }
+                result.mtText?.let { remember(speaker, it) }
             }
             TurnState.Idle, is TurnState.Recording -> Unit
         }

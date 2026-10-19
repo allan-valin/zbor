@@ -214,6 +214,62 @@ class SwapTest {
     }
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
+class HistoryTest {
+    private fun TestScope.controller(saved: MutableList<HistoryEntry>, tts: TtsEngine = Tts()) = ConversationController(
+        orchestratorFor = { seam -> PipelineOrchestrator(Stt(), Mt(), tts, seam) },
+        recorder = FakeRecorder(), player = FakePlayer(), scope = this, work = StandardTestDispatcher(testScheduler),
+        history = saved.toList(), onHistory = { saved += it },
+    )
+
+    private fun ConversationController.typed(side: Side, text: String) {
+        startTyping(side); edit(side, text); confirm(side)
+    }
+
+    @Test fun `every finished turn is kept, oldest first, and survives the next turn`() = runTest {
+        val saved = mutableListOf<HistoryEntry>()
+        val c = controller(saved)
+        c.typed(Side.BOTTOM, "oi"); advanceUntilIdle()
+        c.typed(Side.BOTTOM, "tchau"); advanceUntilIdle()
+        assertEquals(listOf("oi" to "MK:oi", "tchau" to "MK:tchau"), c.state.value.history.map { it.source to it.translation })
+        assertEquals(Lang.PT, c.state.value.history[0].from)
+        assertEquals(Lang.MK, c.state.value.history[0].to)
+        assertEquals(2, saved.size)                    // handed to persistence
+    }
+
+    @Test fun `a translation that could not be spoken is still kept`() = runTest {
+        val saved = mutableListOf<HistoryEntry>()
+        val c = controller(saved, Tts(fail = true))
+        c.typed(Side.BOTTOM, "oi"); advanceUntilIdle()
+        assertEquals("MK:oi", c.state.value.history.single().translation)
+    }
+
+    @Test fun `saved history is shown again and can be cleared`() = runTest {
+        val saved = mutableListOf(HistoryEntry(Lang.MK, Lang.PT, "здраво", "olá", 1L))
+        val c = controller(saved)
+        assertEquals("olá", c.state.value.history.single().translation)
+        c.clearHistory()
+        assertTrue(c.state.value.history.isEmpty())
+    }
+}
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class CancelTest {
+    @Test fun `cancel leaves editing and restores what was on screen`() = runTest {
+        val c = ConversationController(
+            orchestratorFor = { seam -> PipelineOrchestrator(Stt(), Mt(), Tts(), seam) },
+            recorder = FakeRecorder(), player = FakePlayer(), scope = this, work = StandardTestDispatcher(testScheduler),
+        )
+        c.startTyping(Side.BOTTOM); c.edit(Side.BOTTOM, "oi"); c.confirm(Side.BOTTOM); advanceUntilIdle()
+        c.startTyping(Side.BOTTOM); c.edit(Side.BOTTOM, "half typed")
+        c.cancel()
+        assertEquals(Phase.IDLE, c.state.value.phase)
+        assertEquals("oi", c.state.value.bottom.text)
+        assertEquals("MK:oi", c.state.value.top.text)
+        assertTrue(c.state.value.canReplay(Side.TOP))
+    }
+}
+
 class HomeLangTest {
     @Test fun `bottom half follows the phone language, English otherwise`() {
         assertEquals(Lang.PT, homeLangFor(java.util.Locale.forLanguageTag("pt-BR")))

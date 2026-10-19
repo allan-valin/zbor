@@ -43,6 +43,15 @@ import mk.zbor.R
 import mk.zbor.app.SetupState
 import mk.zbor.app.Work
 import mk.zbor.app.SetupViewModel.Companion.mb
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import mk.zbor.core.Lang
+import mk.zbor.engines.Voices
+import mk.zbor.app.VoiceState
 import java.io.File
 
 interface SetupActions {
@@ -128,25 +137,27 @@ private fun KeepScreenOn() {
 fun SettingsDialog(
     outputSeam: Boolean,
     onOutputSeam: (Boolean) -> Unit,
-    neuralVoice: Boolean,
-    onNeuralVoice: (Boolean) -> Unit,
-    ptVoice: mk.zbor.app.VoiceState,
-    ptVoiceBytes: Long,
-    naturalPt: Boolean,
-    onNaturalPt: (Boolean) -> Unit,
-    onDownloadPt: () -> Unit,
+    voices: Map<Lang, VoiceState>,
+    natural: Map<Lang, Boolean>,
+    voiceBytes: Map<Lang, Long>,
+    onNatural: (Lang, Boolean) -> Unit,
+    onDownload: (Lang) -> Unit,
+    onDelete: (Lang) -> Unit,
+    onPreview: (Lang) -> Unit,
     speechRate: Int,
     onSpeechRate: (Int) -> Unit,
-    onPreviewVoice: () -> Unit,
+    downloadedBytes: Long,
+    onDeleteAll: () -> Unit,
     packDir: File,
     onDismiss: () -> Unit,
 ) {
+    var confirmDeleteAll by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
         title = { Text(stringResource(R.string.settings)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text(stringResource(R.string.review_translation))
@@ -154,51 +165,84 @@ fun SettingsDialog(
                     }
                     Switch(checked = outputSeam, onCheckedChange = onOutputSeam, modifier = Modifier.testTag("output-seam"))
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text(stringResource(R.string.neural_voice))
-                        Text(stringResource(R.string.neural_voice_hint), style = MaterialTheme.typography.bodySmall)
-                    }
-                    Switch(checked = neuralVoice, onCheckedChange = onNeuralVoice, modifier = Modifier.testTag("neural-voice"))
+
+                Text(stringResource(R.string.natural_voices), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.natural_voices_hint), style = MaterialTheme.typography.bodySmall)
+                for (lang in Lang.entries) {
+                    val v = voices[lang] ?: VoiceState()
+                    VoiceRow(lang, v, natural[lang] == true, voiceBytes[lang] ?: 0, onNatural, onDownload, onDelete, onPreview)
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        Text(stringResource(R.string.natural_pt))
-                        Text(
-                            when {
-                                ptVoice.busy -> stringResource(R.string.mb_of_mb, mb(ptVoice.done), mb(ptVoice.total))
-                                ptVoice.error != null -> stringResource(R.string.download_interrupted, ptVoice.error)
-                                else -> stringResource(R.string.natural_pt_hint)
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                    if (ptVoice.installed) {
-                        Switch(checked = naturalPt, onCheckedChange = onNaturalPt, modifier = Modifier.testTag("natural-pt"))
-                    } else {
-                        OutlinedButton(onClick = onDownloadPt, enabled = !ptVoice.busy, modifier = Modifier.testTag("download-pt")) {
-                            Text(stringResource(R.string.download_size, mb(ptVoiceBytes)))
-                        }
-                    }
-                }
-                Text(stringResource(R.string.speech_speed))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Slider(
-                        value = speechRate.toFloat(),
-                        onValueChange = { onSpeechRate(it.roundToInt()) },
-                        valueRange = EspeakTtsEngine.MIN_RATE.toFloat()..EspeakTtsEngine.MAX_RATE.toFloat(),
-                        steps = (EspeakTtsEngine.MAX_RATE - EspeakTtsEngine.MIN_RATE) / 10 - 1,
-                        modifier = Modifier.weight(1f).testTag("speech-rate"),
-                    )
-                    FilledTonalIconButton(onClick = onPreviewVoice, modifier = Modifier.testTag("preview-voice")) {
-                        Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = stringResource(R.string.play_example))
-                    }
-                }
+
+                Text(stringResource(R.string.speech_speed), style = MaterialTheme.typography.titleMedium)
+                Slider(
+                    value = speechRate.toFloat(),
+                    onValueChange = { onSpeechRate(it.roundToInt()) },
+                    valueRange = EspeakTtsEngine.MIN_RATE.toFloat()..EspeakTtsEngine.MAX_RATE.toFloat(),
+                    steps = (EspeakTtsEngine.MAX_RATE - EspeakTtsEngine.MIN_RATE) / 10 - 1,
+                    modifier = Modifier.testTag("speech-rate"),
+                )
                 Text(stringResource(R.string.speech_speed_value, speechRate), style = MaterialTheme.typography.bodySmall)
+
+                Text(stringResource(R.string.downloads_title), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.downloads_total, mb(downloadedBytes)), style = MaterialTheme.typography.bodySmall)
+                OutlinedButton(onClick = { confirmDeleteAll = true }, enabled = downloadedBytes > 0,
+                    modifier = Modifier.testTag("delete-all")) {
+                    Icon(Icons.Default.Delete, null, modifier = Modifier.padding(end = 8.dp))
+                    Text(stringResource(R.string.delete_all))
+                }
                 Text(stringResource(R.string.models_at, packDir.path), style = MaterialTheme.typography.bodySmall)
             }
         },
     )
+    if (confirmDeleteAll) {
+        AlertDialog(
+            onDismissRequest = { confirmDeleteAll = false },
+            title = { Text(stringResource(R.string.delete_all_title)) },
+            text = { Text(stringResource(R.string.delete_all_text, mb(downloadedBytes))) },
+            confirmButton = {
+                TextButton(onClick = { confirmDeleteAll = false; onDeleteAll() }, modifier = Modifier.testTag("delete-all-confirm")) {
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { confirmDeleteAll = false }) { Text(stringResource(R.string.cancel)) } },
+        )
+    }
+}
+
+/** One language: preview ▶, then Download (size) or on/off + delete. */
+@Composable
+private fun VoiceRow(
+    lang: Lang, v: VoiceState, on: Boolean, bytes: Long,
+    onNatural: (Lang, Boolean) -> Unit, onDownload: (Lang) -> Unit, onDelete: (Lang) -> Unit, onPreview: (Lang) -> Unit,
+) {
+    val spec = Voices.of(lang)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = { onPreview(lang) }, modifier = Modifier.testTag("preview-$lang")) {
+            Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = stringResource(R.string.play_example))
+        }
+        Column(Modifier.weight(1f)) {
+            Text("${lang.flag} ${lang.nativeName}")
+            Text(
+                when {
+                    v.busy -> stringResource(R.string.mb_of_mb, mb(v.done), mb(v.total))
+                    v.error != null -> stringResource(R.string.download_interrupted, v.error)
+                    v.installed -> spec.credit + " · " + mb(bytes)
+                    else -> stringResource(R.string.robot_voice_now)
+                },
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        if (v.installed) {
+            Switch(checked = on, onCheckedChange = { onNatural(lang, it) }, modifier = Modifier.testTag("natural-$lang"))
+            IconButton(onClick = { onDelete(lang) }, modifier = Modifier.testTag("delete-$lang")) {
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete))
+            }
+        } else {
+            OutlinedButton(onClick = { onDownload(lang) }, enabled = !v.busy, modifier = Modifier.testTag("download-$lang")) {
+                Text(mb(bytes))
+            }
+        }
+    }
 }
 
 private val Work.label: Int

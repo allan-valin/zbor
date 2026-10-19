@@ -23,7 +23,6 @@ class ModelPack(val dir: File) {
 
     companion object {
         const val PT_VOICE = "pt-br-voice.onnx"
-        val PT_VOICE_FILES = setOf(PT_VOICE, "$PT_VOICE.json")
 
         fun location(context: Context) = ModelPack(File(context.getExternalFilesDir(null), "models"))
 

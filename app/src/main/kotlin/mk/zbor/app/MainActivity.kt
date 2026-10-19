@@ -20,6 +20,7 @@ import mk.zbor.ui.ConversationActions
 import mk.zbor.ui.ConversationScreen
 import mk.zbor.ui.SetupActions
 import mk.zbor.ui.SetupScreen
+import mk.zbor.ui.HistoryDialog
 import mk.zbor.ui.SettingsDialog
 import mk.zbor.ui.ZborTheme
 
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
     private var micAllowed by mutableStateOf(false)
     private var pendingMic: Side? = null
     private var settingsOpen by mutableStateOf(false)
+    private var historyOpen by mutableStateOf(false)
 
     private val askMic = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         micAllowed = granted
@@ -60,6 +62,8 @@ class MainActivity : ComponentActivity() {
             override fun setLang(side: Side, lang: Lang) = vm.controller.setLang(side, lang)
             override fun setFaceToFace(on: Boolean) = vm.setFaceToFace(on)
             override fun swapLangs() = vm.controller.swapLangs()
+            override fun cancel() = vm.controller.cancel()
+            override fun openHistory() { historyOpen = true }
             override fun openSettings() { settingsOpen = true }
         }
         val setupActions = object : SetupActions {
@@ -78,16 +82,19 @@ class MainActivity : ComponentActivity() {
                     val ui by vm.controller.state.collectAsState()
                     val slow by vm.slowMode.collectAsState()
                     ConversationScreen(ui, micAllowed, slow != null, actions)
+                    if (historyOpen) {
+                        HistoryDialog(ui.history, vm::speak, vm::clearHistory) { historyOpen = false }
+                    }
                     if (settingsOpen) {
                         val rate by vm.speechRate.collectAsState()
-                        val neural by vm.neuralVoice.collectAsState()
-                        val pt by vm.ptVoice.collectAsState()
-                        val naturalPt by vm.naturalPt.collectAsState()
+                        val voices by vm.voices.collectAsState()
+                        val natural by vm.natural.collectAsState()
+                        val stored by vm.downloadedBytes.collectAsState()
                         SettingsDialog(
                             ui.outputSeam, vm.controller::setOutputSeam,
-                            neural, vm::setNeuralVoice,
-                            pt, vm.ptVoiceBytes, naturalPt, vm::setNaturalPt, vm::downloadPtVoice,
-                            rate, vm::setSpeechRate, vm::previewVoice,
+                            voices, natural, vm.voiceBytes, vm::setNatural, vm::downloadVoice, vm::deleteVoice, vm::previewVoice,
+                            rate, vm::setSpeechRate,
+                            stored, { vm.deleteAll { settingsOpen = false; setup.check() } },
                             pack.dir,
                         ) { settingsOpen = false }
                     }

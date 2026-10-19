@@ -34,9 +34,17 @@
     <string name="speech_speed">Sprechgeschwindigkeit</string>
     <string name="speech_speed_value">%1$d Wörter pro Minute — normal sind 175</string>
     <string name="play_example">Beispiel anhören</string>
-    <string name="neural_voice">Natürliche mazedonische Stimme</string>
-    <string name="neural_voice_hint">Aus: die Roboterstimme von eSpeak.</string>
-    <string name="natural_pt">Natürliche portugiesische Stimme (Brasilien)</string>
-    <string name="natural_pt_hint">Piper-Stimme „cadu“, einmal herunterladen.</string>
-    <string name="download_size">Herunterladen (%1$s)</string>
+    <string name="natural_voices">Natürliche Stimmen</string>
+    <string name="natural_voices_hint">Optionale Downloads. Ohne oder ausgeschaltet nutzt die Sprache die Roboterstimme von eSpeak. ▶ spielt ein Beispiel.</string>
+    <string name="robot_voice_now">Jetzt Roboterstimme · natürliche herunterladen</string>
+    <string name="downloads_title">Downloads</string>
+    <string name="downloads_total">Modelle auf diesem Handy: %1$s</string>
+    <string name="delete_all">Alle Downloads löschen…</string>
+    <string name="delete_all_title">Alle Downloads löschen?</string>
+    <string name="delete_all_text">Das gibt %1$s frei. Zbor übersetzt erst wieder, wenn die Basismodelle neu heruntergeladen sind (es bietet das an).</string>
+    <string name="delete">Löschen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="history">Verlauf</string>
+    <string name="clear_history">Leeren</string>
+    <string name="history_empty">Noch keine Übersetzungen.</string>
 </resources>

@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.safeDrawing
@@ -24,6 +25,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.History
+import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
@@ -80,6 +84,8 @@ interface ConversationActions {
     fun setLang(side: Side, lang: Lang)
     fun setFaceToFace(on: Boolean)
     fun swapLangs()
+    fun cancel()
+    fun openHistory()
     fun openSettings()
 }
 
@@ -96,6 +102,8 @@ fun ConversationScreen(
 ) {
     // Edge-to-edge (targetSdk 36): keep clear of the system bars and of the keyboard,
     // and while one side types give it most of what the keyboard leaves.
+    // Back leaves editing (restoring the screen) instead of closing the app.
+    BackHandler(enabled = ui.phase == Phase.EDITING || ui.phase == Phase.REVIEWING) { actions.cancel() }
     val typing = WindowInsets.isImeVisible
     val typingSide = if (typing) ui.speaker?.let { s ->
         if (ui.phase == Phase.REVIEWING) s.other else s
@@ -145,6 +153,9 @@ private fun MiddleBar(ui: ConversationUi, slowMode: Boolean, actions: Conversati
                     maxLines = 2,
                     modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
                 )
+                FilledTonalIconButton(onClick = actions::openHistory, modifier = Modifier.testTag("history")) {
+                    Icon(Icons.Default.History, contentDescription = stringResource(R.string.history))
+                }
                 FilledTonalIconButton(onClick = actions::openSettings, modifier = Modifier.testTag("settings")) {
                     Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings))
                 }
@@ -218,12 +229,15 @@ private fun SideHalf(
                 )
                 LaunchedEffect(Unit) { if (me.text.isEmpty()) focus.requestFocus() }
             } else {
+                // Long-press to select / copy the transcript or the translation.
+                SelectionContainer {
                 Text(
                     me.text,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = if (ui.replaySide == side) FontWeight.SemiBold else FontWeight.Normal,
                     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag("text-$side"),
                 )
+                }
             }
         }
 
@@ -232,11 +246,18 @@ private fun SideHalf(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            FilledTonalIconButton(
-                onClick = { actions.startTyping(side) },
-                enabled = idleish && !editable,
-                modifier = Modifier.size(56.dp).testTag("type-$side"),
-            ) { Icon(Icons.Default.Keyboard, contentDescription = words.typeHere) }
+            if (editable) {
+                // ✕ leaves editing and puts back what the screen showed before.
+                FilledTonalIconButton(onClick = actions::cancel, modifier = Modifier.size(56.dp).testTag("cancel-$side")) {
+                    Icon(Icons.Default.Close, contentDescription = "✕")
+                }
+            } else {
+                FilledTonalIconButton(
+                    onClick = { actions.startTyping(side) },
+                    enabled = idleish,
+                    modifier = Modifier.size(56.dp).testTag("type-$side"),
+                ) { Icon(Icons.Default.Keyboard, contentDescription = words.typeHere) }
+            }
 
             MicButton(
                 recording = recordingHere,

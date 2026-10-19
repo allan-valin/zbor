@@ -35,9 +35,17 @@
     <string name="speech_speed">Velocidade da voz</string>
     <string name="speech_speed_value">%1$d palavras por minuto — o normal é 175</string>
     <string name="play_example">Ouvir exemplo</string>
-    <string name="neural_voice">Voz macedônia natural</string>
-    <string name="neural_voice_hint">Desligado: a voz robótica do eSpeak.</string>
-    <string name="natural_pt">Voz natural em português (Brasil)</string>
-    <string name="natural_pt_hint">Voz Piper “cadu”, baixada uma vez.</string>
-    <string name="download_size">Baixar (%1$s)</string>
+    <string name="natural_voices">Vozes naturais</string>
+    <string name="natural_voices_hint">Downloads opcionais. Sem uma, ou desligada, o idioma usa a voz robótica do eSpeak. ▶ toca um exemplo.</string>
+    <string name="robot_voice_now">Voz robótica agora · baixe uma natural</string>
+    <string name="downloads_title">Downloads</string>
+    <string name="downloads_total">Modelos neste celular: %1$s</string>
+    <string name="delete_all">Apagar todos os downloads…</string>
+    <string name="delete_all_title">Apagar todos os downloads?</string>
+    <string name="delete_all_text">Isso libera %1$s. O Zbor não traduz até baixar os modelos básicos de novo (ele vai oferecer).</string>
+    <string name="delete">Apagar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="history">Histórico</string>
+    <string name="clear_history">Limpar</string>
+    <string name="history_empty">Nenhuma tradução ainda.</string>
 </resources>

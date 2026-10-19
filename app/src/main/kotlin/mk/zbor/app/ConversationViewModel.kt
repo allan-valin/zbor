@@ -14,7 +14,14 @@ import mk.zbor.core.ResidencyPolicy
 import mk.zbor.core.Lang
 import mk.zbor.engines.EspeakTtsEngine
 import mk.zbor.engines.ModelPack
+import mk.zbor.engines.Voices
+import mk.zbor.engines.VoiceSpec
 import mk.zbor.engines.ZborEngines
+import mk.zbor.BuildConfig
+import mk.zbor.core.ModelKind
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.util.concurrent.Executors
 
 /** Owns the engines (one set per process) and the conversation controller. */
@@ -30,35 +37,35 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
     val slowMode: StateFlow<ResidencyPolicy?> = _slowMode
 
     private val prefs = app.getSharedPreferences("zbor", 0)
+    /** App-private (deleted on uninstall), one JSON object per finished turn. */
+    private val historyFile = java.io.File(app.filesDir, "history.jsonl")
 
     private val _speechRate = MutableStateFlow(prefs.getInt(SPEECH_RATE, EspeakTtsEngine.DEFAULT_RATE))
     /** espeak-ng words per minute (settings slider). */
     val speechRate: StateFlow<Int> = _speechRate
 
-    private val _neuralVoice = MutableStateFlow(prefs.getBoolean(NEURAL_VOICE, true))
-    /** v2: natural (neural) Macedonian voice instead of eSpeak; on by default. */
-    val neuralVoice: StateFlow<Boolean> = _neuralVoice
-
-    private val _naturalPt = MutableStateFlow(prefs.getBoolean(NATURAL_PT, true))
-    val naturalPt: StateFlow<Boolean> = _naturalPt
-
-    /** Optional Brazilian Portuguese voice: null = not installed, else installed. */
     private val installer = ModelPack.installer(app)
-    private val _ptVoice = MutableStateFlow(VoiceState(installed = pack.ptVoice.isFile))
-    val ptVoice: StateFlow<VoiceState> = _ptVoice
-    val ptVoiceBytes: Long = installer.manifest.files.filter { it.name in ModelPack.PT_VOICE_FILES }.sumOf { it.size }
+
+    /** Natural voice per language: on/off preference (on by default once downloaded). */
+    private val _natural = MutableStateFlow(Lang.entries.associateWith { naturalPref(it) })
+    val natural: StateFlow<Map<Lang, Boolean>> = _natural
+
+    /** Natural voice per language: installed / downloading / last error. */
+    private val _voices = MutableStateFlow(Voices.all.associate { it.lang to VoiceState(installed = isInstalled(it)) })
+    val voices: StateFlow<Map<Lang, VoiceState>> = _voices
+    val voiceBytes: Map<Lang, Long> = Voices.all.associate { v ->
+        v.lang to installer.manifest.files.filter { it.name in v.files }.sumOf { it.size }
+    }
+
+    private val _downloadedBytes = MutableStateFlow(0L)
+    /** Everything Zbor has stored: base pack + voices. */
+    val downloadedBytes: StateFlow<Long> = _downloadedBytes
 
     private val engines = ZborEngines.create(
         pack, ZborEngines.policyFor(app),
         onPolicyChange = { _slowMode.value = it },
         speechRate = { _speechRate.value },
-        naturalVoice = { lang ->
-            when (lang) {
-                mk.zbor.core.Lang.MK -> _neuralVoice.value
-                mk.zbor.core.Lang.PT -> _naturalPt.value
-                else -> true
-            }
-        },
+        naturalVoice = { lang -> _natural.value[lang] == true },
     )
 
     val controller = ConversationController(
@@ -69,48 +76,101 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
         work = work,
         faceToFace = prefs.getBoolean(FACE_TO_FACE, false),
         homeLang = homeLangFor(java.util.Locale.getDefault()),
+        history = HistoryFile.load(historyFile),
+        onHistory = { e -> viewModelScope.launch(Dispatchers.IO) { HistoryFile.append(historyFile, e) } },
     )
 
-    fun setNaturalPt(on: Boolean) {
-        _naturalPt.value = on
-        prefs.edit().putBoolean(NATURAL_PT, on).apply()
+    fun clearHistory() {
+        controller.clearHistory()
+        viewModelScope.launch(Dispatchers.IO) { historyFile.delete() }
     }
 
-    /** Downloads the optional pt-BR voice, then reloads TTS so it is used from the next turn. */
-    fun downloadPtVoice() {
-        if (_ptVoice.value.busy) return
-        _ptVoice.value = VoiceState(busy = true)
-        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            val error = try {
-                installer.download(mk.zbor.BuildConfig.PACK_URL, only = ModelPack.PT_VOICE_FILES) { done, total ->
-                    _ptVoice.value = VoiceState(busy = true, done = done, total = total)
-                }
-                null
-            } catch (e: java.io.IOException) {
-                e.message ?: "download failed"
-            }
-            val ok = ModelPack.PT_VOICE_FILES.all(installer::isInstalled)
-            if (ok) kotlinx.coroutines.withContext(work) { engines.models.evict(mk.zbor.core.ModelKind.TTS) }
-            _ptVoice.value = VoiceState(installed = ok, error = if (ok) null else error)
+    /** Speaks any text (history ▶) with the current voice for [lang]. */
+    fun speak(text: String, lang: Lang) {
+        if (controller.state.value.busy) return
+        viewModelScope.launch {
+            val audio = runCatching { withContext(work) { engines.tts.synthesize(text, lang) } }.getOrNull() ?: return@launch
+            player.play(audio)
         }
     }
 
-    fun setNeuralVoice(on: Boolean) {
-        _neuralVoice.value = on
-        prefs.edit().putBoolean(NEURAL_VOICE, on).apply()
+    fun setNatural(lang: Lang, on: Boolean) {
+        _natural.value = _natural.value + (lang to on)
+        prefs.edit().putBoolean(NATURAL + lang.name, on).apply()
     }
+
+    /** Downloads one optional voice, then reloads TTS so it speaks from the next turn. */
+    fun downloadVoice(lang: Lang) {
+        val v = Voices.of(lang)
+        if (_voices.value[lang]?.busy == true) return
+        update(lang, VoiceState(busy = true))
+        viewModelScope.launch(Dispatchers.IO) {
+            val error = try {
+                installer.download(BuildConfig.PACK_URL, only = v.files) { done, total ->
+                    update(lang, VoiceState(busy = true, done = done, total = total))
+                }
+                null
+            } catch (e: IOException) {
+                e.message ?: "download failed"
+            }
+            val ok = isInstalled(v)
+            if (ok) withContext(work) { engines.models.evict(ModelKind.TTS) }
+            update(lang, VoiceState(installed = ok, error = if (ok) null else error))
+            refreshDownloaded()
+        }
+    }
+
+    fun deleteVoice(lang: Lang) {
+        viewModelScope.launch(Dispatchers.IO) {
+            withContext(work) { engines.models.evict(ModelKind.TTS) }  // close the session first
+            installer.remove(Voices.of(lang).files)
+            update(lang, VoiceState())
+            refreshDownloaded()
+        }
+    }
+
+    /** Deletes every downloaded model; [then] runs on the main thread (the setup screen takes over). */
+    fun deleteAll(then: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            withContext(work) { engines.models.close() }
+            installer.removeAll()
+            _voices.value = Voices.all.associate { it.lang to VoiceState() }
+            refreshDownloaded()
+            withContext(Dispatchers.Main) { then() }
+        }
+    }
+
+    fun refreshDownloaded() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _downloadedBytes.value = pack.dir.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+        }
+    }
+
+    private fun update(lang: Lang, state: VoiceState) {
+        _voices.value = _voices.value + (lang to state)
+    }
+
+    private fun isInstalled(v: VoiceSpec) = v.files.all(installer::isInstalled)
+
+    /** Old builds stored the Macedonian and Portuguese switches under their own keys. */
+    private fun naturalPref(lang: Lang): Boolean = prefs.getBoolean(NATURAL + lang.name,
+        when (lang) {
+            Lang.MK -> prefs.getBoolean("neuralVoice", true)
+            Lang.PT -> prefs.getBoolean("naturalPt", true)
+            else -> true
+        })
 
     fun setSpeechRate(wpm: Int) {
         _speechRate.value = wpm
         prefs.edit().putInt(SPEECH_RATE, wpm).apply()
     }
 
-    /** Speaks a fixed Macedonian sentence at the current rate, for tuning the slider. */
-    fun previewVoice() {
+    /** Speaks [lang]'s example sentence with whatever voice it uses now, at the current rate. */
+    fun previewVoice(lang: Lang = Lang.MK) {
         if (controller.state.value.busy) return
         viewModelScope.launch {
             val audio = runCatching {
-                kotlinx.coroutines.withContext(work) { engines.tts.synthesize(PREVIEW, Lang.MK) }
+                withContext(work) { engines.tts.synthesize(Voices.of(lang).example, lang) }
             }.getOrNull() ?: return@launch
             player.play(audio)
         }
@@ -123,6 +183,7 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch(work) { runCatching { engines.warmUp() } }
+        refreshDownloaded()
     }
 
     fun onTrimMemory() {
@@ -132,9 +193,7 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
     private companion object {
         const val FACE_TO_FACE = "faceToFace"
         const val SPEECH_RATE = "speechRate"
-        const val NEURAL_VOICE = "neuralVoice"
-        const val NATURAL_PT = "naturalPt"
-        const val PREVIEW = "Здраво, како си? Каде е автобуската станица?"
+        const val NATURAL = "natural_"
     }
 
     override fun onCleared() {
@@ -152,3 +211,20 @@ data class VoiceState(
     val total: Long = 0,
     val error: String? = null,
 )
+
+/** history.jsonl: one turn per line, org.json (no extra dependency). Unreadable lines are skipped. */
+object HistoryFile {
+    fun load(f: java.io.File): List<HistoryEntry> = if (!f.isFile) emptyList() else f.readLines().mapNotNull { line ->
+        runCatching {
+            val o = org.json.JSONObject(line)
+            HistoryEntry(Lang.valueOf(o.getString("from")), Lang.valueOf(o.getString("to")),
+                o.getString("source"), o.getString("translation"), o.getLong("time"))
+        }.getOrNull()
+    }
+
+    fun append(f: java.io.File, e: HistoryEntry) {
+        val o = org.json.JSONObject().put("from", e.from.name).put("to", e.to.name)
+            .put("source", e.source).put("translation", e.translation).put("time", e.time)
+        f.appendText(o.toString() + "\n")
+    }
+}
