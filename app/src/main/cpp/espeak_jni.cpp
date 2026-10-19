@@ -3,6 +3,7 @@
 #include <jni.h>
 #include <vector>
 #include <cstring>
+#include <string>
 #include <espeak-ng/speak_lib.h>
 
 static std::vector<short> *g_out = nullptr;
@@ -41,6 +42,29 @@ Java_mk_zbor_engines_EspeakNative_synth(JNIEnv *env, jobject, jstring text, jstr
     jshortArray arr = env->NewShortArray(static_cast<jsize>(out.size()));
     env->SetShortArrayRegion(arr, 0, static_cast<jsize>(out.size()), out.data());
     return arr;
+}
+
+// IPA phonemes for Piper voices: one clause per espeak_TextToPhonemes call, joined by spaces
+// (the same as `espeak-ng -q --ipa`, which tools/voice/piper_eval.py used to pick the voice).
+extern "C" JNIEXPORT jstring JNICALL
+Java_mk_zbor_engines_EspeakNative_phonemes(JNIEnv *env, jobject, jstring text, jstring voice) {
+    const char *v = env->GetStringUTFChars(voice, nullptr);
+    espeak_ERROR vr = espeak_SetVoiceByName(v);
+    env->ReleaseStringUTFChars(voice, v);
+    if (vr != EE_OK) return nullptr;
+    const char *t = env->GetStringUTFChars(text, nullptr);
+    const void *ptr = t;
+    std::string out;
+    while (ptr != nullptr) {
+        const char *ph = espeak_TextToPhonemes(&ptr, espeakCHARS_UTF8, 0x02 /* IPA */);
+        if (ph == nullptr) break;
+        if (*ph) {
+            if (!out.empty()) out += ' ';
+            out += ph;
+        }
+    }
+    env->ReleaseStringUTFChars(text, t);
+    return env->NewStringUTF(out.c_str());
 }
 
 extern "C" JNIEXPORT void JNICALL

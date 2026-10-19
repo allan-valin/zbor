@@ -13,5 +13,7 @@ internal object EspeakNative {
     /** [dataParent] is the directory that contains `espeak-ng-data`. Returns the sample rate, or ≤0. */
     external fun init(dataParent: String): Int
     external fun synth(text: String, voice: String, wordsPerMinute: Int): ShortArray?
+    /** IPA phonemes (for Piper voices), clauses joined by spaces. */
+    external fun phonemes(text: String, voice: String): String?
     external fun terminate()
 }
