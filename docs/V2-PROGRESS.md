@@ -112,3 +112,14 @@ first unchecked item and keep going until all are checked or Allan says he woke 
    the next step; the Macedonian sentences and number words still need a native check.
 4. **Your call:** eSpeak default 175 → 140 wpm cuts its errors by a fifth (26.6 → 20.9 %).
 5. Not done: M5 (pt/en/de natural voices) — measured, no clarity gain, deferred.
+
+## 2026-10-19 daytime (Allan awake)
+- Freed ~10 GB of failed-training leftovers (+4.7 GB NLLB PyTorch cache from the July spike). The
+  ~/zbor-build/.venv is now small (onnx, numpy, onnxruntime, soundfile); retraining a voice needs torch
+  again (uv pip install torch transformers datasets accelerate …, see this log).
+- Optional voices: PackFile.optional (never blocks the app; download on request; import if present).
+  First one: Brazilian Portuguese, Piper `pt_BR-cadu-medium` — Whisper CER 12.4 % vs eSpeak 28.9 %
+  (faber 15.7, jeff 22.4). Release `voice-pt_BR-cadu`; ⚙ → Download (62 MB). JNI phonemes = desktop
+  goldens on 39/41 sentences (2 differ by one stress mark).
+- 0.3.1 on Allan's phone (setup screen shows what is missing, not the whole pack). Removed my 1 GB
+  staging copy in the phone's Download/zbor-pack; the app's model folder had no duplicates.
