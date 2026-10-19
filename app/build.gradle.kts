@@ -19,8 +19,8 @@ android {
         applicationId = "mk.zbor"
         minSdk = 29
         targetSdk = 36
-        versionCode = 4
-        versionName = "0.3.1"
+        versionCode = 5
+        versionName = "0.4.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "PACK_URL", "\"$packUrl\"")
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }

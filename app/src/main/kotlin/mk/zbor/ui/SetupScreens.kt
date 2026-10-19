@@ -168,7 +168,8 @@ fun SettingsDialog(
 
                 Text(stringResource(R.string.natural_voices), style = MaterialTheme.typography.titleMedium)
                 Text(stringResource(R.string.natural_voices_hint), style = MaterialTheme.typography.bodySmall)
-                for (lang in Lang.entries) {
+                // Only languages that have a natural voice published (in the manifest) get a row.
+                for (lang in Lang.entries.filter { (voiceBytes[it] ?: 0) > 0 }) {
                     val v = voices[lang] ?: VoiceState()
                     VoiceRow(lang, v, natural[lang] == true, voiceBytes[lang] ?: 0, onNatural, onDownload, onDelete, onPreview)
                 }
