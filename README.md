@@ -18,7 +18,7 @@ Bulgarian neural voice (Meta MMS) reading Macedonian, so it has a Bulgarian acce
 The robotic eSpeak NG voice is still there as a switch in ⚙. **Feedback from
 Macedonian speakers is exactly what this test is for** — see *What to test* below.
 
-> **Status: test version (0.2).** Android only, 64-bit ARM phones (practically every
+> **Status: test version (0.3).** Android only, 64-bit ARM phones (practically every
 > phone from 2018 on). Needs about **1.4 GB of free space** and a **one-time
 > 1.2 GB download over Wi-Fi**; after that it works completely offline.
 > Updating from 0.1: install the new APK over the old one, open it and tap
@@ -43,7 +43,7 @@ Macedonian speakers is exactly what this test is for** — see *What to test* be
 
 | What | Link |
 |---|---|
-| The app (`zbor-0.2.0.apk`, ~50 MB) | https://github.com/allan-valin/zbor/releases/latest |
+| The app (`zbor-0.3.0.apk`, ~50 MB) | https://github.com/allan-valin/zbor/releases/latest |
 | The offline model pack (7 files, 1.2 GB) | the app downloads it by itself on first start — nothing to do |
 
 ### Step 1 — allow your phone to install the app
@@ -56,7 +56,7 @@ from your browser or file manager. This is normal for test apps.
 
 In words:
 
-1. Open the download link above **on the phone** and download `zbor-0.2.0.apk`.
+1. Open the download link above **on the phone** and download `zbor-0.3.0.apk`.
 2. Open the downloaded file (from the browser's download notification, or the
    **Files / Downloads** app).
 3. Android says the browser is not allowed to install unknown apps → tap
@@ -122,7 +122,7 @@ conversation across a table — each person uses their own half.
 | ✓ (turns green) | "The text is right — translate and speak it" |
 | 🔊 | Speak the last translation again |
 | ⇅ | Swap the languages (normal mode) |
-| ⚙ | Settings: **natural Macedonian voice** on/off (off = robotic eSpeak), **voice speed** (slider + 🔊 *play example*; normal is 175 words/min) and *review the translation before speaking* |
+| ⚙ | Settings: **natural Macedonian voice** on/off (off = robotic eSpeak), **natural Brazilian Portuguese voice** (optional download, 62 MB), **voice speed** (slider + 🔊 *play example*; normal is 175 words/min) and *review the translation before speaking* |
 
 Each half shows its hints in its own language, so the Macedonian speaker only
 ever needs to read Macedonian.
@@ -255,7 +255,7 @@ Linux / macOS:
 adb devices                       # the phone must be listed as "device", not "unauthorized"
 
 # the app
-curl -L -o zbor.apk https://github.com/allan-valin/zbor/releases/latest/download/zbor-0.2.0.apk
+curl -L -o zbor.apk https://github.com/allan-valin/zbor/releases/latest/download/zbor-0.3.0.apk
 adb install -r zbor.apk           # Xiaomi: tap "Install" on the phone now
 
 # the model pack (1.2 GB) into the phone's Download/zbor-pack folder
@@ -280,7 +280,7 @@ Windows (PowerShell, inside the platform-tools folder):
 
 ```powershell
 .\adb devices
-curl.exe -L -o zbor.apk https://github.com/allan-valin/zbor/releases/latest/download/zbor-0.2.0.apk
+curl.exe -L -o zbor.apk https://github.com/allan-valin/zbor/releases/latest/download/zbor-0.3.0.apk
 .\adb install -r zbor.apk
 $R = "https://github.com/allan-valin/zbor/releases/download"
 $DEST = "/sdcard/Download/zbor-pack"

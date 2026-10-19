@@ -36,7 +36,7 @@
     <string name="speech_speed_value">%1$d words per minute — normal is 175</string>
     <string name="play_example">Play example</string>
     <string name="neural_voice">Natural Macedonian voice</string>
-    <string name="neural_voice_hint">Off: the robotic eSpeak voice. Other languages always use eSpeak.</string>
+    <string name="neural_voice_hint">Off: the robotic eSpeak voice.</string>
     <string name="natural_pt">Natural Portuguese voice (Brazil)</string>
     <string name="natural_pt_hint">Piper voice “cadu”, downloaded once.</string>
     <string name="download_size">Download (%1$s)</string>
