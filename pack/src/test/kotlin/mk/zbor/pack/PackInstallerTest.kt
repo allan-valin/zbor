@@ -152,4 +152,29 @@ class PackInstallerTest {
             assertTrue(File(device, "voice.onnx").isFile)
         }
     }
+
+    @Test fun `optional files do not block readiness and download only on request`() {
+        val m = makeRelease()
+        File(release, "voice-pt.onnx").writeBytes(Random(5).nextBytes(30_000))
+        val opt = PackManifest.build("x", release).files.first { it.name == "voice-pt.onnx" }.copy(optional = true)
+        val withOpt = PackManifest("v", m.files + opt)
+        TestServer(release).use { srv ->
+            val p = PackInstaller(device, withOpt)
+            p.download(srv.url) { _, _ -> }
+            assertTrue(p.status().ready)                       // optional voice not needed to start
+            assertTrue(!File(device, "voice-pt.onnx").exists())
+            assertTrue(!p.isInstalled("voice-pt.onnx"))
+            p.download(srv.url, only = setOf("voice-pt.onnx")) { _, _ -> }
+            assertTrue(p.isInstalled("voice-pt.onnx"))
+        }
+    }
+
+    @Test fun `import picks up optional files that are in the folder`() {
+        val m = makeRelease()
+        File(release, "voice-pt.onnx").writeBytes(Random(6).nextBytes(10_000))
+        val opt = PackManifest.build("x", release).files.first { it.name == "voice-pt.onnx" }.copy(optional = true)
+        val p = PackInstaller(device, PackManifest("v", m.files + opt))
+        p.import({ name -> File(release, name).takeIf { it.isFile }?.inputStream() }) { _, _ -> }
+        assertTrue(p.isInstalled("voice-pt.onnx"))
+    }
 }

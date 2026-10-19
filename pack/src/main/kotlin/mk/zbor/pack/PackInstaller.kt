@@ -23,9 +23,10 @@ data class ImportResult(val imported: List<String>, val rejected: List<String>, 
 class PackInstaller(val dir: File, val manifest: PackManifest) {
     private val markers = File(dir, ".verified")
 
+    /** Readiness of the required files (optional voices never block the app). */
     fun status(deep: Boolean = false): PackStatus {
         val ok = mutableListOf<PackFile>(); val missing = mutableListOf<PackFile>(); val bad = mutableListOf<PackFile>()
-        for (f in manifest.files) when (check(f, deep)) {
+        for (f in manifest.files.filterNot { it.optional }) when (check(f, deep)) {
             State.OK -> ok += f
             State.MISSING -> missing += f
             State.BAD -> bad += f
@@ -33,15 +34,23 @@ class PackInstaller(val dir: File, val manifest: PackManifest) {
         return PackStatus(ok, missing, bad)
     }
 
-    /** Downloads whatever is missing or bad from [baseUrl]; [progress] gets (bytes done, total). */
-    fun download(baseUrl: String, progress: (Long, Long) -> Unit) {
+    fun isInstalled(name: String): Boolean =
+        manifest.files.firstOrNull { it.name == name }?.let { check(it, deep = false) == State.OK } == true
+
+    /**
+     * Downloads from [baseUrl]: by default whatever required file is missing or bad; with
+     * [only], just those files (e.g. one optional voice). [progress] gets (bytes done, total).
+     */
+    fun download(baseUrl: String, only: Set<String>? = null, progress: (Long, Long) -> Unit) {
         dir.mkdirs()
-        val todo = status()
-        var done = todo.ok.sumOf { it.size }
-        for (f in todo.missing + todo.bad) {
+        val scope = manifest.files.filter { if (only == null) !it.optional else it.name in only }
+        val todo = scope.filter { check(it, deep = false) != State.OK }
+        val total = scope.sumOf { it.size }
+        var done = total - todo.sumOf { it.size }
+        for (f in todo) {
             val part = File(dir, "${f.name}.part")
             val base = done
-            fetch(URL(urlOf(baseUrl, f)), part, f.size) { got -> progress(base + got, manifest.totalBytes) }
+            fetch(URL(urlOf(baseUrl, f)), part, f.size) { got -> progress(base + got, total) }
             if (part.length() < f.size) {
                 // The connection ended early but cleanly: keep the bytes, the next call resumes.
                 throw IOException("${f.name}: connection ended at ${part.length()} of ${f.size} bytes")
@@ -51,7 +60,7 @@ class PackInstaller(val dir: File, val manifest: PackManifest) {
                 throw IOException("${f.name}: checksum mismatch")
             }
             done += f.size
-            progress(done, manifest.totalBytes)
+            progress(done, total)
         }
     }
 
@@ -59,11 +68,11 @@ class PackInstaller(val dir: File, val manifest: PackManifest) {
     fun import(open: (String) -> InputStream?, progress: (Long, Long) -> Unit): ImportResult {
         dir.mkdirs()
         val imported = mutableListOf<String>(); val rejected = mutableListOf<String>(); val absent = mutableListOf<String>()
-        val todo = status()
-        var done = todo.ok.sumOf { it.size }
-        for (f in todo.missing + todo.bad) {
+        val todo = manifest.files.filter { check(it, deep = false) != State.OK }
+        var done = manifest.totalBytes - todo.filterNot { it.optional }.sumOf { it.size }
+        for (f in todo) {
             val input = open(f.name)
-            if (input == null) { absent += f.name; continue }
+            if (input == null) { if (!f.optional) absent += f.name; continue }
             val part = File(dir, "${f.name}.part")
             val base = done
             input.use { src -> FileOutputStream(part).use { out -> copy(src, out) { got -> progress(base + got, manifest.totalBytes) } } }

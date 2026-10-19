@@ -10,6 +10,7 @@ import java.security.MessageDigest
  * One release asset. [unzip] assets are extracted into the pack dir and not kept.
  * [release] names the GitHub release that holds it when that is not the one the
  * download URL points at (pack-v2 adds the voice without re-uploading pack-v1's files).
+ * [optional] files (extra voices) are not needed to start and download only on request.
  */
 @Serializable
 data class PackFile(
@@ -18,12 +19,14 @@ data class PackFile(
     val sha256: String,
     val unzip: Boolean = false,
     val release: String? = null,
+    val optional: Boolean = false,
 )
 
 /** What a complete pack is: shipped inside the APK, so sideloaded files are checked too. */
 @Serializable
 data class PackManifest(val version: String, val files: List<PackFile>) {
-    val totalBytes: Long get() = files.sumOf { it.size }
+    /** What the first-run download fetches: the required files. */
+    val totalBytes: Long get() = files.filterNot { it.optional }.sumOf { it.size }
 
     fun toJson(): String = json.encodeToString(serializer(), this)
 
