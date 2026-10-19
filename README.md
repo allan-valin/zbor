@@ -45,7 +45,7 @@ Macedonian speakers is exactly what this test is for** — see *What to test* be
 
 | What | Link |
 |---|---|
-| The app (`zbor-0.4.0.apk`, ~50 MB) | https://github.com/allan-valin/zbor/releases/latest |
+| The app (`zbor-0.4.1.apk`, ~50 MB) | https://github.com/allan-valin/zbor/releases/latest |
 | The offline model pack (7 files, 1.2 GB) | the app downloads it by itself on first start — nothing to do |
 
 ### Step 1 — allow your phone to install the app
@@ -58,7 +58,7 @@ from your browser or file manager. This is normal for test apps.
 
 In words:
 
-1. Open the download link above **on the phone** and download `zbor-0.4.0.apk`.
+1. Open the download link above **on the phone** and download `zbor-0.4.1.apk`.
 2. Open the downloaded file (from the browser's download notification, or the
    **Files / Downloads** app).
 3. Android says the browser is not allowed to install unknown apps → tap
@@ -259,7 +259,7 @@ Linux / macOS:
 adb devices                       # the phone must be listed as "device", not "unauthorized"
 
 # the app
-curl -L -o zbor.apk https://github.com/allan-valin/zbor/releases/latest/download/zbor-0.4.0.apk
+curl -L -o zbor.apk https://github.com/allan-valin/zbor/releases/latest/download/zbor-0.4.1.apk
 adb install -r zbor.apk           # Xiaomi: tap "Install" on the phone now
 
 # the model pack (1.2 GB) into the phone's Download/zbor-pack folder
@@ -284,7 +284,7 @@ Windows (PowerShell, inside the platform-tools folder):
 
 ```powershell
 .\adb devices
-curl.exe -L -o zbor.apk https://github.com/allan-valin/zbor/releases/latest/download/zbor-0.4.0.apk
+curl.exe -L -o zbor.apk https://github.com/allan-valin/zbor/releases/latest/download/zbor-0.4.1.apk
 .\adb install -r zbor.apk
 $R = "https://github.com/allan-valin/zbor/releases/download"
 $DEST = "/sdcard/Download/zbor-pack"
