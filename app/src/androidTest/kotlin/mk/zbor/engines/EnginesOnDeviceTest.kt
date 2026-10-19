@@ -13,6 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.math.abs
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
@@ -90,6 +91,34 @@ class EnginesOnDeviceTest {
             log("neural mk ${(System.nanoTime() - t0) / 1_000_000} ms: ${u.pcm.size} samples @ ${u.sampleRate}")
             assertTrue(u.pcm.size > u.sampleRate * 1.5, "too short: ${u.pcm.size}")
             assertTrue(u.pcm.maxOf { abs(it.toInt()) } > 10_000, "silent")
+        }
+    }
+
+    @Test fun jniPhonemesMatchTheDesktopGoldens() {
+        EspeakTtsEngine.open(pack.dir).use {
+            val lines = assets.open("pt_piper_goldens.tsv").bufferedReader().readLines().filter { it.isNotBlank() }
+            // The JNI phonemizes clause by clause; the desktop CLI sees the whole text, which can
+            // move a stress mark on a short word after a colon. Report every difference.
+            val diffs = lines.mapNotNull { line ->
+                val (pt, ipa) = line.split("\t")
+                val got = synchronized(EspeakNative) { EspeakNative.phonemes(pt, "pt-br") }
+                if (got == ipa) null else "$pt\n  desktop $ipa\n  device  $got"
+            }
+            diffs.forEach { log("phoneme diff: $it") }
+            assertTrue(diffs.size <= 2, "${diffs.size} of ${lines.size} differ:\n" + diffs.joinToString("\n"))
+        }
+    }
+
+    @Test fun piperSpeaksPortuguese() {
+        assumeTrue(pack.ptVoice.isFile)
+        EspeakTtsEngine.open(pack.dir).use {
+            mk.zbor.tts.PiperTtsEngine.open(Lang.PT, pack.ptVoice,
+                { t, v -> synchronized(EspeakNative) { EspeakNative.phonemes(t, v) }.orEmpty() }, { 175 }).use { tts ->
+                val t0 = System.nanoTime()
+                val u = tts.synthesize("Onde fica a farmácia mais próxima? Custa 250 reais.", Lang.PT)
+                log("piper pt ${(System.nanoTime() - t0) / 1_000_000} ms: ${u.pcm.size} samples @ ${u.sampleRate}")
+                assertTrue(u.pcm.size > u.sampleRate * 2, "too short: ${u.pcm.size}")
+            }
         }
     }
 }

@@ -53,15 +53,18 @@ class ModelMgr(
         try {
             return block(model)
         } finally {
-            if (slot.kind !in policy.keeps) evict(slot.kind)
+            if (slot.kind !in policy.keeps) evictInternal(slot.kind)
         }
     }
 
     @Synchronized fun onMemoryPressure() = stepColder()
 
+    /** Drops one model (e.g. TTS after a new voice was installed); the next use reloads it. */
+    @Synchronized fun evict(kind: ModelKind) = evictInternal(kind)
+
     @Synchronized
     override fun close() {
-        resident.keys.toList().forEach(::evict)
+        resident.keys.toList().forEach(::evictInternal)
     }
 
     private fun <M : AutoCloseable> load(slot: ModelSlot<M>): M {
@@ -79,11 +82,11 @@ class ModelMgr(
         val next = policy.colder()
         if (next == policy) return
         policy = next
-        resident.keys.filter { it !in next.keeps }.forEach(::evict)
+        resident.keys.filter { it !in next.keeps }.forEach(::evictInternal)
         onPolicyChange(next)
     }
 
-    private fun evict(kind: ModelKind) {
+    private fun evictInternal(kind: ModelKind) {
         resident.remove(kind)?.close()
     }
 }

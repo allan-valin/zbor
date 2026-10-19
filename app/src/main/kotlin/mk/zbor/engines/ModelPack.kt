@@ -18,8 +18,13 @@ class ModelPack(val dir: File) {
     /** v2: the fine-tuned Macedonian neural voice (VITS, ONNX) and its character vocabulary. */
     val mkVoice = File(dir, "mk-voice.onnx")
     val mkVoiceVocab = File(dir, "mk-voice.vocab.json")
+    /** Optional Piper voices (config next to them as `<name>.json`), downloaded from settings. */
+    val ptVoice = File(dir, PT_VOICE)
 
     companion object {
+        const val PT_VOICE = "pt-br-voice.onnx"
+        val PT_VOICE_FILES = setOf(PT_VOICE, "$PT_VOICE.json")
+
         fun location(context: Context) = ModelPack(File(context.getExternalFilesDir(null), "models"))
 
         /** The manifest shipped in the APK (assets/pack.json, written by tools/build_pack.sh). */

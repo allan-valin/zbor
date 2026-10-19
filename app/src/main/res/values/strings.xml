@@ -37,4 +37,7 @@
     <string name="play_example">Play example</string>
     <string name="neural_voice">Natural Macedonian voice</string>
     <string name="neural_voice_hint">Off: the robotic eSpeak voice. Other languages always use eSpeak.</string>
+    <string name="natural_pt">Natural Portuguese voice (Brazil)</string>
+    <string name="natural_pt_hint">Piper voice “cadu”, downloaded once.</string>
+    <string name="download_size">Download (%1$s)</string>
 </resources>

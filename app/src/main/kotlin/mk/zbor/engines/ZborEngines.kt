@@ -15,6 +15,8 @@ import mk.zbor.core.SttEngine
 import mk.zbor.core.TtsEngine
 import mk.zbor.mt.NllbMtEngine
 import mk.zbor.mt.NllbTokenizer
+import mk.zbor.core.Lang
+import mk.zbor.tts.PiperTtsEngine
 import mk.zbor.tts.VitsTtsEngine
 
 /** The three real engines, sharing one [ModelMgr]. */
@@ -38,7 +40,7 @@ class ZborEngines(
             policy: ResidencyPolicy,
             onPolicyChange: (ResidencyPolicy) -> Unit = {},
             speechRate: () -> Int = { EspeakTtsEngine.DEFAULT_RATE },
-            neuralVoice: () -> Boolean = { true },
+            naturalVoice: (Lang) -> Boolean = { true },
         ): ZborEngines {
             val mgr = ModelMgr(policy, onPolicyChange)
             val stt = ModelSlot(ModelKind.STT) { WhisperSttEngine.open(pack.whisper) }
@@ -49,14 +51,18 @@ class ZborEngines(
                 NllbMtEngine.open(pack.nllbEncoder, pack.nllbDecoder, tokenizer, opts)
             }
             val tts = ModelSlot(ModelKind.TTS) {
-                val neural = if (pack.mkVoice.isFile) {
-                    val opts = OrtSession.SessionOptions().apply { setIntraOpNumThreads(4) }
-                    VitsTtsEngine.open(pack.mkVoice, pack.mkVoiceVocab, speechRate, opts)
-                } else null
-                RoutedTts(EspeakTtsEngine.open(pack.dir, speechRate), neural, neuralVoice)
+                val espeak = EspeakTtsEngine.open(pack.dir, speechRate) // also initialises the phonemizer
+                val natural = HashMap<Lang, mk.zbor.core.TtsEngine>()
+                val opts = { OrtSession.SessionOptions().apply { setIntraOpNumThreads(4) } }
+                if (pack.mkVoice.isFile) natural[Lang.MK] = VitsTtsEngine.open(pack.mkVoice, pack.mkVoiceVocab, speechRate, opts())
+                if (pack.ptVoice.isFile) natural[Lang.PT] = PiperTtsEngine.open(Lang.PT, pack.ptVoice, ::phonemes, speechRate, opts())
+                RoutedTts(espeak, natural, naturalVoice)
             }
             return ZborEngines(ManagedStt(mgr, stt), ManagedMt(mgr, mt), ManagedTts(mgr, tts), mgr, listOf(stt, mt))
         }
+
+        private fun phonemes(text: String, voice: String): String =
+            synchronized(EspeakNative) { EspeakNative.phonemes(text, voice) }.orEmpty()
 
         fun policyFor(context: Context): ResidencyPolicy {
             val info = ActivityManager.MemoryInfo()

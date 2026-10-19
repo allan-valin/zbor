@@ -43,6 +43,20 @@
             "size": 6938060,
             "sha256": "330d80552f82749bc2d4d394ffb3ec8838b9a4302bbccbd2b9d79d96d04938fd",
             "release": "pack-v1"
+        },
+        {
+            "name": "pt-br-voice.onnx",
+            "size": 62950044,
+            "sha256": "765f0809a6ea9035d4a6d0d008dbf8876e68b2dd32029312672fa8f405bdb535",
+            "release": "voice-pt_BR-cadu",
+            "optional": true
+        },
+        {
+            "name": "pt-br-voice.onnx.json",
+            "size": 5040,
+            "sha256": "5fe03aa3d4901880554905b12075713cd552598c8a350455a1ec73f8b4e6be19",
+            "release": "voice-pt_BR-cadu",
+            "optional": true
         }
     ]
 }

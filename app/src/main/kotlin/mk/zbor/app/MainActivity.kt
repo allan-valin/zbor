@@ -81,9 +81,12 @@ class MainActivity : ComponentActivity() {
                     if (settingsOpen) {
                         val rate by vm.speechRate.collectAsState()
                         val neural by vm.neuralVoice.collectAsState()
+                        val pt by vm.ptVoice.collectAsState()
+                        val naturalPt by vm.naturalPt.collectAsState()
                         SettingsDialog(
                             ui.outputSeam, vm.controller::setOutputSeam,
                             neural, vm::setNeuralVoice,
+                            pt, vm.ptVoiceBytes, naturalPt, vm::setNaturalPt, vm::downloadPtVoice,
                             rate, vm::setSpeechRate, vm::previewVoice,
                             pack.dir,
                         ) { settingsOpen = false }

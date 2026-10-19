@@ -19,8 +19,8 @@ android {
         applicationId = "mk.zbor"
         minSdk = 29
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "PACK_URL", "\"$packUrl\"")
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
@@ -57,6 +57,8 @@ android {
     }
     kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
     buildFeatures { compose = true; buildConfig = true }
+    // Device tests read the same goldens as the JVM tests.
+    sourceSets["androidTest"].assets.srcDir(rootProject.file("eval"))
     packaging { jniLibs { useLegacyPackaging = false } }
 }
 

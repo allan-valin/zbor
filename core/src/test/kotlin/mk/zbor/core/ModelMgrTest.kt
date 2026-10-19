@@ -104,4 +104,13 @@ class ModelMgrTest {
         assertTrue(s.made.all { it.closed })
         assertFalse(m.isResident(ModelKind.STT))
     }
+
+    @Test fun `evict drops one resident model so the next use reloads it`() {
+        val s = Slots(); val m = ModelMgr(ResidencyPolicy.HOT)
+        m.use(s.tts) {}
+        m.evict(ModelKind.TTS)
+        assertTrue(s.made.single().closed)
+        m.use(s.tts) {}
+        assertEquals(2, s.loads[ModelKind.TTS])
+    }
 }

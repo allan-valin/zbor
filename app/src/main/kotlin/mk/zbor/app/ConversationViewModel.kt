@@ -39,11 +39,26 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
     /** v2: natural (neural) Macedonian voice instead of eSpeak; on by default. */
     val neuralVoice: StateFlow<Boolean> = _neuralVoice
 
+    private val _naturalPt = MutableStateFlow(prefs.getBoolean(NATURAL_PT, true))
+    val naturalPt: StateFlow<Boolean> = _naturalPt
+
+    /** Optional Brazilian Portuguese voice: null = not installed, else installed. */
+    private val installer = ModelPack.installer(app)
+    private val _ptVoice = MutableStateFlow(VoiceState(installed = pack.ptVoice.isFile))
+    val ptVoice: StateFlow<VoiceState> = _ptVoice
+    val ptVoiceBytes: Long = installer.manifest.files.filter { it.name in ModelPack.PT_VOICE_FILES }.sumOf { it.size }
+
     private val engines = ZborEngines.create(
         pack, ZborEngines.policyFor(app),
         onPolicyChange = { _slowMode.value = it },
         speechRate = { _speechRate.value },
-        neuralVoice = { _neuralVoice.value },
+        naturalVoice = { lang ->
+            when (lang) {
+                mk.zbor.core.Lang.MK -> _neuralVoice.value
+                mk.zbor.core.Lang.PT -> _naturalPt.value
+                else -> true
+            }
+        },
     )
 
     val controller = ConversationController(
@@ -55,6 +70,30 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
         faceToFace = prefs.getBoolean(FACE_TO_FACE, false),
         homeLang = homeLangFor(java.util.Locale.getDefault()),
     )
+
+    fun setNaturalPt(on: Boolean) {
+        _naturalPt.value = on
+        prefs.edit().putBoolean(NATURAL_PT, on).apply()
+    }
+
+    /** Downloads the optional pt-BR voice, then reloads TTS so it is used from the next turn. */
+    fun downloadPtVoice() {
+        if (_ptVoice.value.busy) return
+        _ptVoice.value = VoiceState(busy = true)
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val error = try {
+                installer.download(mk.zbor.BuildConfig.PACK_URL, only = ModelPack.PT_VOICE_FILES) { done, total ->
+                    _ptVoice.value = VoiceState(busy = true, done = done, total = total)
+                }
+                null
+            } catch (e: java.io.IOException) {
+                e.message ?: "download failed"
+            }
+            val ok = ModelPack.PT_VOICE_FILES.all(installer::isInstalled)
+            if (ok) kotlinx.coroutines.withContext(work) { engines.models.evict(mk.zbor.core.ModelKind.TTS) }
+            _ptVoice.value = VoiceState(installed = ok, error = if (ok) null else error)
+        }
+    }
 
     fun setNeuralVoice(on: Boolean) {
         _neuralVoice.value = on
@@ -94,6 +133,7 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
         const val FACE_TO_FACE = "faceToFace"
         const val SPEECH_RATE = "speechRate"
         const val NEURAL_VOICE = "neuralVoice"
+        const val NATURAL_PT = "naturalPt"
         const val PREVIEW = "Здраво, како си? Каде е автобуската станица?"
     }
 
@@ -103,3 +143,12 @@ class ConversationViewModel(app: Application) : AndroidViewModel(app) {
         worker.shutdown()
     }
 }
+
+/** An optional voice in settings: installed, or downloading (bytes), or the last error. */
+data class VoiceState(
+    val installed: Boolean = false,
+    val busy: Boolean = false,
+    val done: Long = 0,
+    val total: Long = 0,
+    val error: String? = null,
+)

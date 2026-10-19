@@ -128,6 +128,11 @@ fun SettingsDialog(
     onOutputSeam: (Boolean) -> Unit,
     neuralVoice: Boolean,
     onNeuralVoice: (Boolean) -> Unit,
+    ptVoice: mk.zbor.app.VoiceState,
+    ptVoiceBytes: Long,
+    naturalPt: Boolean,
+    onNaturalPt: (Boolean) -> Unit,
+    onDownloadPt: () -> Unit,
     speechRate: Int,
     onSpeechRate: (Int) -> Unit,
     onPreviewVoice: () -> Unit,
@@ -153,6 +158,26 @@ fun SettingsDialog(
                         Text(stringResource(R.string.neural_voice_hint), style = MaterialTheme.typography.bodySmall)
                     }
                     Switch(checked = neuralVoice, onCheckedChange = onNeuralVoice, modifier = Modifier.testTag("neural-voice"))
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.natural_pt))
+                        Text(
+                            when {
+                                ptVoice.busy -> stringResource(R.string.mb_of_mb, mb(ptVoice.done), mb(ptVoice.total))
+                                ptVoice.error != null -> stringResource(R.string.download_interrupted, ptVoice.error)
+                                else -> stringResource(R.string.natural_pt_hint)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    if (ptVoice.installed) {
+                        Switch(checked = naturalPt, onCheckedChange = onNaturalPt, modifier = Modifier.testTag("natural-pt"))
+                    } else {
+                        OutlinedButton(onClick = onDownloadPt, enabled = !ptVoice.busy, modifier = Modifier.testTag("download-pt")) {
+                            Text(stringResource(R.string.download_size, mb(ptVoiceBytes)))
+                        }
+                    }
                 }
                 Text(stringResource(R.string.speech_speed))
                 Row(verticalAlignment = Alignment.CenterVertically) {
