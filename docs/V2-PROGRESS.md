@@ -18,8 +18,8 @@ first unchecked item and keep going until all are checked or Allan says he woke 
 - [x] M3b data prep: espeak mk phonemes/text → MMS char set mapping; train/val split
 - [x] M3c pilot fine-tune (≤30 min, capped scope): s/step, VRAM, samples at checkpoints
 - [x] M3d price the full run (hours) → log
-- [ ] M3e full fine-tune (memory-capped systemd scope, checkpoints, samples on the eval set)
-- [ ] M3f synthesize the eval set with the new voice; package rating sheet A/B (espeak vs neural)
+- [x] M3e full fine-tune (memory-capped systemd scope, checkpoints, samples on the eval set)
+- [x] M3f synthesize the eval set with the new voice; package rating sheet A/B (espeak vs neural)
 - [x] M4a export VITS to ONNX, verify output = PyTorch on eval sentences
 - [x] M4b `VitsTtsEngine` in the app (ORT, mk text front-end in Kotlin), JVM/instrumented tests
 - [ ] M4c settings switch eSpeak ↔ neural, pack-v2 manifest/download, emulator pass
@@ -75,3 +75,18 @@ first unchecked item and keep going until all are checked or Allan says he woke 
 - 03:30 phrases: 361 long clips + 509 phrases (60 min). pshort failed at start (datasets ignores a
   symlinked split dir) → fixed, re-queued after pfix (unit zbor-queue3). pfix stage 1: 38.2 %
   (no-fix stage 1: 40.6 %).
+- 04:35 RESULT of the training night (Whisper CER on the 41 sentences, lower = more intelligible):
+  | voice | CER |
+  |---|---|
+  | eSpeak 175 wpm (app default) | 26.6 % |
+  | eSpeak 140 wpm | 20.9 % |
+  | Bulgarian MMS voice, untrained, low noise | 21.4 % (rate 0.8: 20.1 %, 0.9: 22.1 %) |
+  | fine-tuned on FLEURS speaker #10, best (2000 steps, low noise) | 27.5 % |
+  | same with п→щ fix, best | 30.2 % |
+  | п-fix + 509 short phrases | 48.6 → 52.4 % (stopped) |
+  | real recordings of speaker #10 | 6.9 % |
+  No fine-tuned voice beat the untrained Bulgarian one: they learn some Macedonian pronunciation
+  (георги, колко чини) but garble short sentences. Shipping the untrained Bulgarian voice (low
+  noise baked in) as the v2 "natural voice" — about as intelligible as slow eSpeak, but human.
+  Recommendation for Allan: eSpeak default 175 → 140 wpm (−21 % errors); left unchanged.
+  Rating sheet eval/rating-v2.html: blind eSpeak 175 / eSpeak 140 / neural.
