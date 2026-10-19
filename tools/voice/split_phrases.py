@@ -1,9 +1,10 @@
 """V2-M3 variant: short phrase clips cut from one speaker's long FLEURS recordings.
 
 The voice trained on 5–32 s clips garbles short sentences, which are most of what the
-app says. Whisper word timestamps (whisper.cpp, -ml 1) locate pauses; words are aligned
-to the official transcript, and clips are cut in the middle of pauses ≥ 200 ms so every
-phrase keeps its true text. Output: a dataset with the original clips plus the phrases.
+app says. Silences (≥ 200 ms, 35 dB under the clip's peak) are found in the audio; Whisper word
+timestamps (whisper.cpp, -ml 1; contiguous, so they cannot show pauses themselves) tell
+which word boundary a silence sits on, and words are aligned to the official transcript,
+so every phrase keeps its true text. Cuts go in the middle of the silence. Output: a dataset with the original clips plus the phrases.
 
     ~/zbor-build/.venv/bin/python tools/voice/split_phrases.py [speaker=10] [pfix]
 """
@@ -51,6 +52,23 @@ def word_times(wav: Path) -> list[tuple[str, float, float]]:
     return out
 
 
+def silences(audio, sr) -> list[tuple[float, float]]:
+    import numpy as np
+    hop = int(0.02 * sr)
+    n = len(audio) // hop
+    db = 10 * np.log10((audio[: n * hop].reshape(n, hop) ** 2).mean(1) + 1e-10)
+    quiet = db < db.max() - 35
+    out, start = [], None
+    for i, q in enumerate(list(quiet) + [False]):
+        if q and start is None:
+            start = i
+        elif not q and start is not None:
+            if (i - start) * 0.02 >= MIN_GAP:
+                out.append((start * 0.02, i * 0.02))
+            start = None
+    return out
+
+
 def main() -> None:
     CACHE.mkdir(parents=True, exist_ok=True)
     clips = {Path(r["file"]).name: r for r in csv.DictReader(open(SRC / "clips.csv"))}
@@ -72,13 +90,18 @@ def main() -> None:
         for a, b, size in sm.get_matching_blocks():
             for k in range(size):
                 t[a + k] = hyp[b + k][1:]
+        audio, sr = sf.read(src, dtype="float32")
+        sil = silences(audio, sr)
         cuts = [0.0]
         cut_words = [0]
         for k in range(len(ref) - 1):
-            if k in t and k + 1 in t and t[k + 1][0] - t[k][1] >= MIN_GAP:
-                cuts.append((t[k][1] + t[k + 1][0]) / 2)
+            if k not in t or k + 1 not in t:
+                continue
+            boundary = t[k][1]
+            near = [s for s in sil if s[0] - 0.3 <= boundary <= s[1] + 0.3 and (s[0] + s[1]) / 2 > cuts[-1]]
+            if near:
+                cuts.append(sum(near[0]) / 2)
                 cut_words.append(k + 1)
-        audio, sr = sf.read(src, dtype="float32")
         cuts.append(len(audio) / sr)
         cut_words.append(len(ref))
         for j in range(len(cuts) - 1):

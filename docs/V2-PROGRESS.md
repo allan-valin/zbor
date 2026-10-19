@@ -68,3 +68,7 @@ first unchecked item and keep going until all are checked or Allan says he woke 
   колко чини, најблиска) but garbles SHORT sentences (training clips are 5–32 s) and still
   drops п. Lower inference noise (noise 0.333, duration noise 0.4): stage 3 26.5 %, untrained
   21.4 % → candidates are scored low-noise from now on; the untrained voice stays a candidate.
+- 03:00 stages 4/5: 32.0 / 33.7 % → plateau since 2000 steps; stopped the main run (stages 6–8
+  would have cost 45 GPU min for nothing). Phrase splitter: Whisper word times are contiguous, so
+  pauses come from audio energy (≥200 ms, −35 dB) matched to word boundaries; ~1.5 phrases/clip.
+  Queue (unit zbor-queue2): pshort = п-fix + short phrases, 4 stages; then pfix only, 3 stages.
