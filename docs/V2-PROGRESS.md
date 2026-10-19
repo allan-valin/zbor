@@ -62,3 +62,9 @@ first unchecked item and keep going until all are checked or Allan says he woke 
   pack: per-file `release` (pack-v2 adds files, pack-v1 files stay where they are), 11 tests.
   App: RoutedTts (mk → neural if present + switched on, else eSpeak), settings switch EN/PT/DE,
   ResidencyPolicy.HOT now keeps TTS too (108 MB voice would reload every turn).
+- 02:35 stages: 1000 → 40.6 %, 2000 → 30.7 %, 3000 → 32.6 % (plateau). Reference: Whisper on the
+  REAL speaker's held-out clips 6.9 % → the gap is the voice, not the metric. Untrained Bulgarian
+  voice 21.8 %. Per-sentence look: stage 3 learned Macedonian pronunciation in places (георги,
+  колко чини, најблиска) but garbles SHORT sentences (training clips are 5–32 s) and still
+  drops п. Lower inference noise (noise 0.333, duration noise 0.4): stage 3 26.5 %, untrained
+  21.4 % → candidates are scored low-noise from now on; the untrained voice stays a candidate.

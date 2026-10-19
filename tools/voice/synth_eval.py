@@ -22,6 +22,11 @@ out = ROOT / "eval/audio" / name
 out.mkdir(parents=True, exist_ok=True)
 tok = AutoTokenizer.from_pretrained(model_dir)
 model = VitsModel.from_pretrained(model_dir).eval()
+import os
+if "NOISE" in os.environ:  # VitsModel copies these from the config at load time
+    model.noise_scale = float(os.environ["NOISE"])
+if "NOISE_W" in os.environ:
+    model.noise_scale_duration = float(os.environ["NOISE_W"])
 torch.manual_seed(0)
 for r in csv.DictReader(open(ROOT / "eval/mk_eval_sentences.tsv"), delimiter="\t"):
     ids = tok(to_model_text(r["mk"], p_fix), return_tensors="pt")
