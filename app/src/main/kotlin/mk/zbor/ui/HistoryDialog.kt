@@ -36,7 +36,7 @@ import java.util.Date
 fun HistoryDialog(history: List<HistoryEntry>, onSpeak: (String, Lang) -> Unit, onClear: () -> Unit, onDismiss: () -> Unit) {
     val list = rememberLazyListState()
     LaunchedEffect(history.size) { if (history.isNotEmpty()) list.scrollToItem(history.lastIndex) }
-    AlertDialog(
+    ZborAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.history)) },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },

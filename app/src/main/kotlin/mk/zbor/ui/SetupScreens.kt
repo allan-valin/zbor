@@ -153,7 +153,7 @@ fun SettingsDialog(
     onDismiss: () -> Unit,
 ) {
     var manage by remember { mutableStateOf(false) }
-    AlertDialog(
+    ZborAlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
         title = { Text(stringResource(R.string.settings)) },
@@ -209,7 +209,7 @@ fun SettingsDialog(
 @Composable
 private fun ManageVoicesDialog(voices: Map<Lang, VoiceState>, voiceBytes: Map<Lang, Long>, onDelete: (Lang) -> Unit, onDismiss: () -> Unit) {
     val installed = Lang.entries.filter { voices[it]?.installed == true }
-    AlertDialog(
+    ZborAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.manage_voices_title)) },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
