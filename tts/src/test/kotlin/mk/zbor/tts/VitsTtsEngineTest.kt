@@ -9,13 +9,13 @@ import kotlin.test.Test
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-/** Runs an exported voice (default: the pilot) on the desktop runtime. */
+/** Runs the shipped voice (tools/voice/export_onnx.py → bul-raw.onnx) on the desktop runtime. */
 class VitsTtsEngineTest {
     private val dir = File(System.getenv("ZBOR_VOICE") ?: "")
     private fun engine(wpm: Int = 175): VitsTtsEngine {
-        val model = File(dir, "pilot.onnx")
+        val model = File(dir, "bul-raw.onnx")
         assumeTrue(model.isFile, "no exported voice at $model")
-        return VitsTtsEngine.open(model, File(dir, "pilot.vocab.json"), { wpm })
+        return VitsTtsEngine.open(model, File(dir, "bul-raw.vocab.json"), { wpm })
     }
 
     @Test fun `speaks a Macedonian sentence with numbers`() {
